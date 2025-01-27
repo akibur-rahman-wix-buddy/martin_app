@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<colors>
+
+  
+<color name="allPrimaryColor">#FFE4EAFF</color>
+<color name="secondaryColor">#FFFFB75A</color>
+<color name="primaruDarki">#FF02BF65</color>
+<color name="gradiant2">#FF955EF9</color>
+<color name="disableColour">#FFE0EDFF</color>
+<color name="boxShadow">#FF0D6BF8</color>
+<color name="c3D4040">#FF3D4040</color>
+<color name="c97A0AF">#FF97A0AF</color>
+<color name="cD1D5DC">#FFD1D5DC</color>
+<color name="cB3BAC5">#FFB3BAC5</color>
+<color name="c1A1A1A">#FF1A1A1A</color>
+<color name="cFFFFFF">#FFFFFFFF</color>
+<color name="c000000">#FF000000</color>
+<color name="c8993A4">#FF8993A4</color>
+<color name="cB3B3B3">#FFB3B3B3</color>
+<color name="c292E34">#FF292E34</color>
+<color name="c54585C">#FF54585C</color>
+<color name="c919293">#FF919293</color>
+<color name="cEBEBEB">#FFEBEBEB</color>
+<color name="c394456">#FF394456</color>
+<color name="cD2D2D2">#FFD2D2D2</color>
+<color name="c02BF65">#FF02BF65</color>
+<color name="c1F1F1F">#FF1F1F1F</color>
+<color name="cFF2368">#FFFF2368</color>
+<color name="cFBC42E">#FFFBC42E</color>
+<color name="cFFE7EE">#FFFFE7EE</color>
+<color name="cEFF3F8">#FFEFF3F8</color>
+<color name="cFFF5DA">#FFFFF5DA</color>
+<color name="cE0EDFF">#FFE0EDFF</color>
+<color name="c36AD2F">#FF36AD2F</color>
+<color name="c02BF65">#FF02BF65</color>
+<color name="cFEFEFE">#FFFEFEFE</color>
+<color name="c152889">#FF152889</color>
+<color name="cFF755F">#FFFF755F</color>
+
+
+<color name="cA1ABCC">#FFA1ABCC</color>
+<color name="cA09E9E">#FFA09E9E</color>
+<color name="cA09E9E">#FFA09E9E</color>
+<color name="cEFF0F3">#FFEFF0F3</color>
+<color name="cA1ABCC">#FFA1ABCC</color>
+<color name="cBFBBBB">#FFBFBBBB</color>
+
+
+
+
+
+
+
+
+
+<!-- old -->
+  <color name="cFEFFFE">#FF071112</color>
+  <color name="cDFDFDF">#FFDFDFDF</color>
+  <color name="c47B54C">#FF47B54C</color>
+  <color name="c0A0909">#FF0A0909</color>
+ 
+  <color name="cF4F4F4">#FFF4F4F4</color>
+ 
+  <color name="c231F20">#FF231F20</color>
+  <color name="cEB001B">#FFEB001B</color>
+  <color name="cF79E1B">#FFF79E1B</color>
+  <color name="cFF5F00">#FFFF5F00</color>
+  <color name="c0B0A0A">#FF0B0A0A</color>
+  <color name="cABABAB">#FFABABAB</color>
+  <color name="cF45310">#FFF45310</color>
+  <color name="cCACACA">#FFCACACA</color>
+  <color name="cFFC6AE">#FFFFC6AE</color>
+  <color name="c969696">#FF969696</color>
+  <color name="cC9C9C9">#FFC9C9C9</color>
+  <color name="cEEEEEE">#FFEEEEEE</color>
+  <color name="cF0F0F0">#FFF0F0F0</color>
+  <color name="cFF0000">#FFFF0000</color>
+  <color name="c7F7E7E">#FF7F7E7E</color>
+  <color name="c212121">#FF212121</color>
+  <color name="cEDBB43">#FFEDBB43</color>
+  <color name="c2C303E">#FF2C303E</color>
+  <color name="c9B9B9B">#FF9B9B9B</color>
+  <color name="cFF9500A">#FFF9500A</color>
+  <color name="cFD9D9D9">#FFD9D9D9</color>
+  <color name="scaffoldColor">#FF071112</color>
+
+  <color name="activeColor">#FF326144</color>
+  <color name="debitHigheColor">#FFB7242A</color>
+  <color name="inactiveColor">#FFEDBB43</color>
+  <color name="linkColor">#FFF0E0C1</color>
+  <color name="loginBackground">#FFF4D68E</color>
+  <color name="warningColor">#FFB7242A</color>
+  <color name="ratingColor">#FFE65934</color>
+  <color name="bgColor">#FFFBFBFB</color>
+  <color name="headLine1Color">#FF4A4A4A</color>
+  <color name="headLine2Color">#FF131313</color>
+  <color name="disabledColor">#FF9B9B9B</color>
+  <color name="unselectedButtonTextColor">#FF2C303E</color>
+  <color name="creditHighliteColor">#FF709B72</color>
+  <color name="penIconColor">#FF00A7FF</color>
+  <color name="alertButtonColor">#FFFEFFFB</color>
+  <color name="white">#FFFFFFFF</color>
+  <color name="borderColor">#FFDDDDDD</color>
+  <color name="secondaryColor">#FF444242</color>
+  <color name="shadowText">#FFF1F2F7</color>
+  <color name="shadowText2">#FFB0B0B0</color>
+</colors>
