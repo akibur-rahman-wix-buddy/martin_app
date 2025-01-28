@@ -20,6 +20,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isScrolling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    _fetchNotes(); // Attach scroll listener
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener); // Remove listener
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    // Show the button only when scrolling down past 200 pixels
+    if (_scrollController.offset > 200 && !_isScrolling) {
+      setState(() {
+        _isScrolling = true;
+      });
+    } else if (_scrollController.offset <= 200 && _isScrolling) {
+      setState(() {
+        _isScrolling = false;
+      });
+    }
+  }
+
+  void _scrollToTop() {
+    _scrollController.animateTo(
+      0.0,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
   List<Map<String, dynamic>> _notes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
   List<Map<String, dynamic>> _previousNotes = [];
@@ -32,11 +70,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Set<int> _selectedNotes = Set<int>();
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchNotes();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _fetchNotes();
+  // }
 
   // void _fetchNotes() async {
   //   final notes = await DatabaseHelper().getNotes();
@@ -98,7 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           elevation: 1,
           shadowColor: AppColors.cFFFFFF,
-          surfaceTintColor: AppColors.cFFFFFF,
           iconTheme: IconThemeData(
             color: Colors.black,
           ),
@@ -120,17 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextFontStyle.textStylec17cA1ABCCInter700,
                 ),
           actions: [
-            // IconButton(
-            //   icon: Icon(
-            //     Icons.search,
-            //     size: 35,
-            //   ),
-            //   onPressed: () {
-            //     setState(() {
-            //       _isSearching = !_isSearching;
-            //     });
-            //   },
-            // ),
             if (_selectedNotes.isNotEmpty)
               IconButton(
                 icon: Icon(Icons.delete, color: Colors.red),
@@ -154,217 +180,253 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         drawer: CustomDrawer(),
-        body: Column(
+        body: Stack(
           children: [
-            UIHelper.verticalSpace(4.h),
-            _isSearching
-                ? SizedBox.shrink()
-                : Column(
-                    children: [
-                      Text(
-                        'Previous Notes',
-                        style: TextFontStyle.textStylec17cA09E9EPoppins700,
-                      ),
-                      UIHelper.verticalSpace(4.h),
-                      if (_previousNotes.isNotEmpty)
-                        Stack(
+            SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  UIHelper.verticalSpace(4.h),
+                  _isSearching
+                      ? SizedBox.shrink()
+                      : Column(
                           children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24.w),
-                              child: CarouselSlider(
-                                carouselController: _carouselController,
-                                options: CarouselOptions(
-                                  height: 122.h,
-                                  viewportFraction: 1,
-                                  autoPlay: true,
-                                  enlargeCenterPage: true,
-                                  onPageChanged: (index, reason) {
-                                    setState(() {
-                                      _currentSlideIndex = index;
-                                    });
-                                  },
-                                ),
-                                items: _previousNotes.map((note) {
-                                  return Container(
-                                    width: double.infinity,
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 8.w),
-                                    padding: EdgeInsets.all(10.sp),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.cEFF0F3,
-                                      borderRadius: BorderRadius.circular(22.r),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        SizedBox(height: 5),
-                                        Text(
-                                          note['content'] ?? 'No Content',
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(fontSize: 14),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                            Text(
+                              'Previous Notes',
+                              style:
+                                  TextFontStyle.textStylec17cA09E9EPoppins700,
                             ),
-                            Positioned(
-                              left: 0,
-                              top: 35.h,
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios,
-                                    size: 20.sp, color: AppColors.cBFBBBB),
-                                onPressed: () {
-                                  if (_currentSlideIndex > 0) {
-                                    _carouselController.previousPage();
-                                  }
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              right: -5,
-                              top: 35.h,
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_forward_ios,
-                                    size: 20.sp, color: AppColors.cBFBBBB),
-                                onPressed: () {
-                                  if (_currentSlideIndex <
-                                      _previousNotes.length - 1) {
-                                    _carouselController.nextPage();
-                                  }
-                                },
-                              ),
-                            ),
-                            Positioned(
-                              right: 50.w,
-                              bottom: 8.h,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  _previousNotes.length,
-                                  (index) => Container(
-                                    width: 8.w,
-                                    height: 8.h,
-                                    margin:
-                                        EdgeInsets.symmetric(horizontal: 4.w),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: _currentSlideIndex == index
-                                          ? Colors.black
-                                          : Colors.grey,
+                            UIHelper.verticalSpace(4.h),
+                            if (_previousNotes.isNotEmpty)
+                              Stack(
+                                children: [
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 24.w),
+                                    child: CarouselSlider(
+                                      carouselController: _carouselController,
+                                      options: CarouselOptions(
+                                        height: 122.h,
+                                        viewportFraction: 1,
+                                        autoPlay: true,
+                                        enlargeCenterPage: true,
+                                        onPageChanged: (index, reason) {
+                                          setState(() {
+                                            _currentSlideIndex = index;
+                                          });
+                                        },
+                                      ),
+                                      items: _previousNotes.map((note) {
+                                        return Container(
+                                          width: double.infinity,
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 8.w),
+                                          padding: EdgeInsets.all(10.sp),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.cEFF0F3,
+                                            borderRadius:
+                                                BorderRadius.circular(22.r),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(height: 5),
+                                              Text(
+                                                note['content'] ?? 'No Content',
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }).toList(),
                                     ),
                                   ),
-                                ),
+                                  Positioned(
+                                    left: 0,
+                                    top: 35.h,
+                                    child: IconButton(
+                                      icon: Icon(Icons.arrow_back_ios,
+                                          size: 20.sp,
+                                          color: AppColors.cBFBBBB),
+                                      onPressed: () {
+                                        if (_currentSlideIndex > 0) {
+                                          _carouselController.previousPage();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: -5,
+                                    top: 35.h,
+                                    child: IconButton(
+                                      icon: Icon(Icons.arrow_forward_ios,
+                                          size: 20.sp,
+                                          color: AppColors.cBFBBBB),
+                                      onPressed: () {
+                                        if (_currentSlideIndex <
+                                            _previousNotes.length - 1) {
+                                          _carouselController.nextPage();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 50.w,
+                                    bottom: 8.h,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: List.generate(
+                                        _previousNotes.length,
+                                        (index) => Container(
+                                          width: 8.w,
+                                          height: 8.h,
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 4.w),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: _currentSlideIndex == index
+                                                ? Colors.black
+                                                : Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
+                            UIHelper.verticalSpace(6.h),
+                            Text(
+                              'Learning from mistakes - 09/03',
+                              style: TextFontStyle.textStylec17cA09E9EPoppins700
+                                  .copyWith(fontSize: 16.sp),
+                            ),
+                            UIHelper.verticalSpace(6.h),
+                            Text(
+                              'All Notes (${_filteredNotes.length})',
+                              style: TextFontStyle.textStylec17cA1ABCCInter700,
                             ),
                           ],
                         ),
-                      UIHelper.verticalSpace(6.h),
-                      Text(
-                        'Learning from mistakes - 09/03',
-                        style: TextFontStyle.textStylec17cA09E9EPoppins700
-                            .copyWith(fontSize: 16.sp),
+                  GridView.builder(
+                      padding: EdgeInsets.all(12.sp),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 30.w,
+                        mainAxisSpacing: 10.h,
+                        childAspectRatio: 0.5,
                       ),
-                      UIHelper.verticalSpace(6.h),
-                      Text(
-                        'All Notes (${_filteredNotes.length})',
-                        style: TextFontStyle.textStylec17cA1ABCCInter700,
-                      ),
-                    ],
-                  ),
-            Expanded(
-              child: GridView.builder(
-                  padding: EdgeInsets.all(12.sp),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 30,
-                    mainAxisSpacing: 20,
-                    childAspectRatio: 2 / 3,
-                  ),
-                  itemCount: _filteredNotes.length,
-                  itemBuilder: (context, index) {
-                    final note = _filteredNotes[index];
-                    bool isSelected = _selectedNotes.contains(note['id']);
+                      itemCount: _filteredNotes.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final note = _filteredNotes[index];
+                        bool isSelected = _selectedNotes.contains(note['id']);
 
-                    return GestureDetector(
-                      onLongPress: () => _toggleNoteSelection(note['id']),
-                      onTap: () {
-                        if (_selectedNotes.isEmpty) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => NoteEditorScreen(
-                                note: note,
-                                onSave: _fetchNotes,
-                              ),
-                            ),
-                          );
-                        } else {
-                          _toggleNoteSelection(note['id']);
-                        }
-                      },
-                      child: Column(
-                        children: [
-                          AnimatedContainer(
-                            height: 200.h,
-                            width: double.infinity,
-                            duration: Duration(milliseconds: 200),
-                            margin: EdgeInsets.all(4.sp),
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Colors.blueAccent.withOpacity(0.3)
-                                  : AppColors.cFFFFFF,
-                              borderRadius: BorderRadius.circular(22.r),
-                              border: Border.all(
-                                color: isSelected
-                                    ? Colors.blueAccent
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  note['content'] ?? 'No Content',
-                                  maxLines: 4,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: Colors.black,
+                        return GestureDetector(
+                          onLongPress: () => _toggleNoteSelection(note['id']),
+                          onTap: () {
+                            if (_selectedNotes.isEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NoteEditorScreen(
+                                    note: note,
+                                    onSave: _fetchNotes,
                                   ),
                                 ),
-                              ],
-                            ),
+                              );
+                            } else {
+                              _toggleNoteSelection(note['id']);
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              AnimatedContainer(
+                                height: 250.h,
+                                width: double.infinity,
+                                duration: Duration(milliseconds: 200),
+                                margin: EdgeInsets.all(4.sp),
+                                padding: EdgeInsets.all(12.sp),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.blueAccent.withOpacity(0.3)
+                                      : AppColors.cFFFFFF,
+                                  borderRadius: BorderRadius.circular(22.r),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? Colors.blueAccent
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      note['content'] ?? 'No Content',
+                                      maxLines: 9,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                note['title'] ?? 'No title',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    TextFontStyle.textStylec17cA1ABCCInter700,
+                              ),
+                              UIHelper.verticalSpace(4.h),
+                              Text(
+                                note['createAt'] != null
+                                    ? DateFormat('h:mm a').format(
+                                        DateTime.parse(note['createAt']))
+                                    : 'No Title',
+                                style: TextFontStyle.textStylec17cA1ABCCInter700
+                                    .copyWith(fontSize: 12.sp),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          Text(
-                            note['title'] ?? 'No title',
-                            maxLines: 9,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextFontStyle.textStylec17cA1ABCCInter700,
-                          ),
-                          UIHelper.verticalSpace(4.h),
-                          Text(
-                            note['createAt'] != null
-                                ? DateFormat('h:mm a')
-                                    .format(DateTime.parse(note['createAt']))
-                                : 'No Title',
-                            style: TextFontStyle.textStylec17cA1ABCCInter700
-                                .copyWith(fontSize: 12.sp),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
+                        );
+                      }),
+                ],
+              ),
             ),
+            if (_isScrolling)
+              Positioned(
+                bottom: 20.h,
+                right: 150.w,
+                child: GestureDetector(
+                  onTap: _scrollToTop,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.cCBD9F5,
+                        ),
+                      ),
+                      child: Icon(Icons.arrow_upward, color: AppColors.cCBD9F5),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
         floatingActionButton: FloatingActionButton(
