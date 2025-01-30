@@ -146,9 +146,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:martin_app/features/custom_drawer/presentation/custom_drawer.dart';
-import 'package:martin_app/helpers/ui_helpers.dart';
 
-import '../../home/presentation/database/db_helper.dart';
+import '../../database/db_helper.dart';
 
 class RecycleBinScreen extends StatefulWidget {
   @override

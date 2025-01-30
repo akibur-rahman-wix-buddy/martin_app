@@ -23,7 +23,8 @@ class DatabaseHelper {
           title TEXT,
           content TEXT,
           createAt TEXT,
-          isDeleted INTEGER DEFAULT 0
+          isDeleted INTEGER DEFAULT 0,
+          starred INTEGER DEFAULT 0
     )''');
     });
   }
@@ -33,20 +34,23 @@ class DatabaseHelper {
     return db.query('notes', orderBy: 'createAt DESC');
   }
 
-  Future<int> addNote(String title, String content) async {
+  Future<int> addNote(String title, String content,
+      {bool starred = false}) async {
     final db = await database;
     return db.insert('notes', {
       'title': title,
       'content': content,
       'createAt': DateTime.now().toIso8601String(),
+      'starred': starred ? 1 : 0,
     });
   }
 
-  Future<int> updateNote(int id, String title, String content) async {
+  Future<int> updateNote(int id, String title, String content,
+      {bool starred = false}) async {
     final db = await database;
     return db.update(
       'notes',
-      {'title': title, 'content': content},
+      {'title': title, 'content': content, 'starred': starred ? 1 : 0},
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -101,6 +105,43 @@ class DatabaseHelper {
       'notes',
       where: 'isDeleted = ?',
       whereArgs: [1],
+    );
+  }
+
+  // Add a recent search query to the database
+  Future<void> addSearchQuery(String query) async {
+    final db = await database;
+    await db.insert('recent_searches', {
+      'query': query,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+  }
+
+// Get the recent search queries, ordered by timestamp (most recent first)
+  Future<List<String>> getRecentSearches() async {
+    final db = await database;
+    final result = await db.query(
+      'recent_searches',
+      orderBy: 'timestamp DESC',
+      limit: 5, // Limit to the latest 5 searches
+    );
+    return result.map((row) => row['query'] as String).toList();
+  }
+
+// Clear all recent search queries
+  Future<void> clearRecentSearches() async {
+    final db = await database;
+    await db.delete('recent_searches');
+  }
+
+  // Fetch only starred notes
+  Future<List<Map<String, dynamic>>> getStarredNotes() async {
+    final db = await database;
+    return db.query(
+      'notes',
+      where: 'starred = ? AND isDeleted = ?',
+      whereArgs: [1, 0], // Only starred and not deleted notes
+      orderBy: 'createAt DESC',
     );
   }
 }

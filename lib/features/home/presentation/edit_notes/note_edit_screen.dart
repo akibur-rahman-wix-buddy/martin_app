@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:martin_app/constants/text_font_style.dart';
-import '../database/db_helper.dart';
+import 'package:martin_app/features/custom_drawer/presentation/custom_drawer.dart';
+import 'package:martin_app/helpers/navigation_service.dart';
+
+import '../../../database/db_helper.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Map<String, dynamic>? note;
@@ -15,6 +18,14 @@ class NoteEditorScreen extends StatefulWidget {
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  bool _isStarred = false;
+
+  void _toggleStarred() {
+    setState(() {
+      _isStarred = !_isStarred;
+    });
+    _saveNote();
+  }
 
   @override
   void initState() {
@@ -22,6 +33,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (widget.note != null) {
       _titleController.text = widget.note!['title'];
       _contentController.text = widget.note!['content'];
+      _isStarred = widget.note!['starred'] == 1;
     }
   }
 
@@ -30,17 +42,44 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     final content = _contentController.text.trim();
 
     if (title.isEmpty || content.isEmpty) {
-      return; // Prevent saving empty notes.
+      return;
     }
 
     if (widget.note == null) {
-      await DatabaseHelper().addNote(title, content);
+      await DatabaseHelper().addNote(title, content, starred: _isStarred);
     } else {
-      await DatabaseHelper().updateNote(widget.note!['id'], title, content);
+      await DatabaseHelper()
+          .updateNote(widget.note!['id'], title, content, starred: _isStarred);
     }
 
     widget.onSave();
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   if (widget.note != null) {
+  //     _titleController.text = widget.note!['title'];
+  //     _contentController.text = widget.note!['content'];
+  //   }
+  // }
+
+  // Future<void> _saveNote() async {
+  //   final title = _titleController.text.trim();
+  //   final content = _contentController.text.trim();
+
+  //   if (title.isEmpty || content.isEmpty) {
+  //     return; // Prevent saving empty notes.
+  //   }
+
+  //   if (widget.note == null) {
+  //     await DatabaseHelper().addNote(title, content);
+  //   } else {
+  //     await DatabaseHelper().updateNote(widget.note!['id'], title, content);
+  //   }
+
+  //   widget.onSave();
+  // }
 
   Future<bool> _onBackPressed() async {
     await _saveNote();
@@ -60,6 +99,44 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
+            PopupMenuButton<String>(
+              onSelected: (String value) {
+                if (value == "starred") {
+                  _toggleStarred();
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem(
+                  value: "starred",
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          _isStarred ? Icons.star : Icons.star_border,
+                          color: _isStarred ? Colors.amber : Colors.black,
+                        ),
+                        onPressed: () {
+                          _toggleStarred();
+                          NavigationService.goBack;
+                        }, // Toggle star when clicked
+                      ),
+                      SizedBox(width: 10),
+                      Text("Starred"),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: "lock",
+                  child: Row(
+                    children: [
+                      Icon(Icons.lock, color: Colors.black),
+                      SizedBox(width: 10),
+                      Text("Lock"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
             // IconButton(
             //   icon: Icon(
             //     Icons.save,

@@ -5,7 +5,6 @@ import 'helpers/di.dart';
 import 'helpers/helper_methods.dart';
 import 'helpers/post_login.dart';
 import 'networks/dio/dio.dart';
-import 'welcome_screen.dart';
 
 final class Loading extends StatefulWidget {
   const Loading({super.key});
