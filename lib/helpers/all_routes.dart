@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:martin_app/features/home/presentation/home.dart';
 import 'package:martin_app/features/recycle_bin/presentation/recycle_bin.dart';
+import 'package:martin_app/features/starred/presentation/starred_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();
@@ -11,50 +12,7 @@ final class Routes {
 
   static const String recycleBinScreen = '/recycle_bin_screen';
   static const String homeScreen = '/home_screen';
-
-  // static const String logInScreen = '/logIn';
-  // static const String signUpScreen = '/signUp';
-  // static const String home = '/home';
-  // static const String search = '/search';
-  // static const String dailyRemainder = '/DailyRemainderScreen';
-  // static const String editRemainder = '/EditRemainderScreen';
-  // static const String pricingPlanScreen = '/PricingPlanScreen';
-  // static const String makeMixScreen = '/MakeMixScreen';
-  // static const String pricingListScreen = '/PricingListScreen';
-  // static const String homeScreenWidget = '/HomeScreenWidget';
-  // static const String setPassword = '/SetPassword';
-  // static const String addQuoteScreen = '/AddQuoteScreen';
-  // static const String previewScreen = '/PreviewScreen';
-  // static const String quoteScreen = '/QuoteScreen';
-  // static const String collectionScreen = '/CollectionScreen';
-  // static const String favouriteScreen = '/FavouriteScreen';
-  // static const String insertEmailScreen = '/InsertEmailScreen';
-  // static const String setNewPasswordScreen = '/SetNewPasswordScreen';
-  // static const String verifyOtpFPScreen = '/VerifyOtpFPScreen';
-  // // static const String addCard = '/Addcard';
-  // static const String profile = '/Profile';
-  // static const String loadingScreen = '/loading';
-  // static const String otpScreen = '/OtpScreen';
-  // static const String webview = '/webview';
-  // static const String categorySearchScreen = '/CategorySearchScreen';
-  // static const String forgotPWScreen = '/ForgotPWScreen';
-
-  // static const String navigationScreen = '/NavigationScreen';
-  // static const String privacyTermScreen = '/privacy_terms_Screen';
-  // static const String myContributionScreen = '/MyContributionScreen';
-  // static const String myCollectionScreen = '/myCollectionScreen';
-  // static const String createCollection = '/createCollectionScreen';
-  // static const String editCollection = '/editCollectionScreen';
-  // static const String editProfile = '/editProfileScreen';
-  // static const String collectionDetails = '/CollectionDetailsScreen';
-  // static const String makeAContributionsScreen = '/MakeAContributionsScreen';
-  // static const String policiesTerms = '/PoliciesTermsScreen';
-  // static const String generalSetting = '/general_setting';
-  // static const String homeScreen = '/home_screen';
-  // static const String theme = '/theme';
-  // static const String setting = '/setting';
-  // static const String contentCategories = '/content_categories';
-  // static const String reminderScreen = '/reminders_screen';
+  static const String starredScreen = '/starred_screen';
 }
 
 final class RouteGenerator {
@@ -74,6 +32,12 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _FadedTransitionRoute(widget: HomeScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => HomeScreen());
+
+      case Routes.starredScreen:
+        return Platform.isAndroid
+            ? _FadedTransitionRoute(
+                widget: StarredNotesScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => StarredNotesScreen());
 
       // // case Routes.categorySearchScreen:
       // //   return Platform.isAndroid
