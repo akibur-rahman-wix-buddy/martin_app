@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:martin_app/constants/text_font_style.dart';
-import 'package:martin_app/features/custom_drawer/presentation/custom_drawer.dart';
 import 'package:martin_app/helpers/navigation_service.dart';
 
 import '../../../database/db_helper.dart';
