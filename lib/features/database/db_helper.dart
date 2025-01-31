@@ -24,6 +24,7 @@ class DatabaseHelper {
           content TEXT,
           createAt TEXT,
           isDeleted INTEGER DEFAULT 0,
+          deletedAt TEXT,
           starred INTEGER DEFAULT 0
     )''');
     });
@@ -61,13 +62,38 @@ class DatabaseHelper {
     return db.delete('notes', where: 'id = ?', whereArgs: [id]);
   }
 
+  // Future<void> moveToRecycleBin(int noteId) async {
+  //   final db = await database;
+  //   await db.update(
+  //     'notes',
+  //     {'isDeleted': 1},
+  //     where: 'id = ?',
+  //     whereArgs: [noteId],
+  //   );
+  // }
+
   Future<void> moveToRecycleBin(int noteId) async {
     final db = await database;
     await db.update(
       'notes',
-      {'isDeleted': 1},
+      {
+        'isDeleted': 1,
+        'deletedAt': DateTime.now().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [noteId],
+    );
+  }
+
+  Future<void> deleteOldNotes() async {
+    final db = await database;
+    final now = DateTime.now();
+    final thirtyDaysAgo = now.subtract(Duration(days: 30)).toIso8601String();
+
+    await db.delete(
+      'notes',
+      where: 'isDeleted = 1 AND deletedAt <= ?',
+      whereArgs: [thirtyDaysAgo],
     );
   }
 

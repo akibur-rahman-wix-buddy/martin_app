@@ -368,14 +368,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       return GestureDetector(
                         onLongPress: () {
                           setState(() {
-                            _isSelecting = true; // Enable selection mode
+                            _isSelecting = true;
                           });
-                          _toggleNoteSelection(
-                              note['id']); // Toggle the selection
+                          _toggleNoteSelection(note['id']);
                         },
                         onTap: () {
                           if (_selectedNotes.isEmpty) {
-                            // Handle normal tap (view/edit note)
                             Navigator.push(
                               context,
                               MaterialPageRoute(

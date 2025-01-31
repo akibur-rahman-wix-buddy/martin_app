@@ -15,6 +15,8 @@ class StarredNotesScreen extends StatefulWidget {
 }
 
 class _StarredNotesScreenState extends State<StarredNotesScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   List<Map<String, dynamic>> _starredNotes = [];
   bool _isSelecting = false;
   Set<int> _selectedNoteIds = Set<int>(); // Track selected notes
@@ -54,13 +56,49 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
     _loadStarredNotes(); // Refresh the list
   }
 
+  String _formatDate(String? dateString) {
+    if (dateString == null) return 'No Date';
+
+    DateTime createAt = DateTime.parse(dateString);
+    DateTime now = DateTime.now();
+
+    // Check if the note was created today
+    bool isToday = createAt.year == now.year &&
+        createAt.month == now.month &&
+        createAt.day == now.day;
+
+    return isToday
+        ? DateFormat('h:mm a').format(createAt) // Show time only if today
+        : DateFormat('dd MMM,').format(createAt); // Show date if older
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(
-          'Starred Notes',
-          style: TextFontStyle.textStylec17c000000Poppins400,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(
+            Icons.menu,
+            color: Colors.black,
+          ),
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+        ),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            Text(
+              'Starred',
+              style: TextStyle(color: Colors.black),
+            ),
+            Icon(
+              Icons.star,
+              color: Colors.amber,
+            )
+          ],
         ),
         actions: [
           if (_isSelecting) // Show action buttons when in selection mode
@@ -72,6 +110,7 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
             ),
         ],
       ),
+      drawer: CustomDrawer(),
       body: GridView.builder(
         padding: EdgeInsets.all(12.sp),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -171,15 +210,24 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                   style: TextFontStyle.textStylec17cA1ABCCInter700,
                 ),
                 UIHelper.verticalSpace(4.h),
-                Text(
-                  note['createAt'] != null
-                      ? DateFormat('h:mm a')
-                          .format(DateTime.parse(note['createAt']))
-                      : 'No Title',
-                  style: TextFontStyle.textStylec17cA1ABCCInter700
-                      .copyWith(fontSize: 12.sp),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      _formatDate(note['createAt']),
+                      style: TextFontStyle.textStylec17cA1ABCCInter700
+                          .copyWith(fontSize: 12.sp),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    UIHelper.horizontalSpace(2.w),
+                    Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                      size: 16.sp,
+                    )
+                  ],
                 ),
               ],
             ),
