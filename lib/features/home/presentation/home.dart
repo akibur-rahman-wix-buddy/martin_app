@@ -92,6 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     setState(() {
       _selectedNotes.clear();
+      if (_selectedNotes.isEmpty) {
+        _isSelecting = false;
+      }
     });
     _fetchNotes();
   }
@@ -149,9 +152,25 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult: (bool didPop, _) async {
-        showMaterialDialog(context);
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
+        if (_isSearching) {
+          setState(() {
+            _isSearching = false;
+            _searchQuery = '';
+            _filteredNotes = _notes;
+          });
+        } else {
+          showMaterialDialog(context);
+        }
       },
+
+      // PopScope(
+      //   canPop: false,
+      //   onPopInvokedWithResult: (bool didPop, _) async {
+      //     showMaterialDialog(context);
+      //   },
       child: Scaffold(
         appBar: AppBar(
           elevation: 1,
@@ -182,17 +201,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.delete, color: Colors.red),
                 onPressed: _deleteSelectedNotes,
               ),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _isSearching = !_isSearching;
-                });
-              },
-              child: Padding(
-                padding: EdgeInsets.all(4.sp),
-                child: Image.asset(Assets.icons.searchIcon.path),
+            if (!_isSelecting)
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _isSearching = !_isSearching;
+                  });
+                },
+                child: Padding(
+                  padding: EdgeInsets.all(4.sp),
+                  child: Image.asset(Assets.icons.searchIcon.path),
+                ),
               ),
-            ),
             PopupMenuButton<String>(
               onSelected: (String value) {
                 if (value == "edit_preview") {

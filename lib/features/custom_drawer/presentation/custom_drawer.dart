@@ -13,6 +13,7 @@ class CustomDrawer extends StatefulWidget {
 
 List<Map<String, dynamic>> _notes = [];
 List<Map<String, dynamic>> _recycleBinNotes = [];
+List<Map<String, dynamic>> _starredNotes = [];
 
 class _CustomDrawerState extends State<CustomDrawer> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
@@ -22,6 +23,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     super.initState();
     _loadNotes();
     _loadRecycleBinNotes();
+    _starredAllNotes();
   }
 
   Future<void> _loadNotes() async {
@@ -38,6 +40,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
+  Future<void> _starredAllNotes() async {
+    var starredAllNotes = await _dbHelper.getStarredNotes();
+    setState(() {
+      _starredNotes = starredAllNotes;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -48,11 +57,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
             decoration: BoxDecoration(
               color: Colors.blueAccent,
             ),
-            child: Text(
-              'Menu',
-              style: TextStyle(
-                color: AppColors.cFFFFFF,
-                fontSize: 24,
+            child: Center(
+              child: Text(
+                'Martin',
+                style: TextStyle(
+                  color: AppColors.cFFFFFF,
+                  fontSize: 24,
+                ),
               ),
             ),
           ),
@@ -77,6 +88,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           ListTile(
             leading: Icon(Icons.star),
             title: Text('Starred'),
+            trailing: Text('${_starredNotes.length}'),
             onTap: () {
               NavigationService.navigateTo(Routes.starredScreen);
               setState(() {});

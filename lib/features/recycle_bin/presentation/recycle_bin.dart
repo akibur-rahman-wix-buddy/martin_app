@@ -46,6 +46,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
     }
     setState(() {
       _selectedNotes.clear();
+      if (_selectedNotes.isEmpty) {
+        _isSelecting = false;
+      }
     });
     _fetchRecycleBinNotes();
   }
@@ -56,6 +59,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
     }
     setState(() {
       _selectedNotes.clear();
+      if (_selectedNotes.isEmpty) {
+        _isSelecting = false;
+      }
     });
     _fetchRecycleBinNotes();
   }
@@ -162,7 +168,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
               ? DateTime.now().difference(deletedAt).inDays
               : 0;
 
-          int daysRemaining = 30 - daysSinceDeleted;
+          // int daysRemaining = 30 - daysSinceDeleted;
           return GestureDetector(
             onLongPress: () {
               setState(() {
