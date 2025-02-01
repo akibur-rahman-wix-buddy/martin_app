@@ -204,12 +204,14 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              note['content'] ?? 'No Content',
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.left,
+                            padding: EdgeInsets.all(12.sp),
+                            child: Expanded(
+                              child: Text(
+                                note['content'] ?? 'No Content',
+                                maxLines: 11,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.left,
+                              ),
                             ),
                           ),
                           Spacer(),

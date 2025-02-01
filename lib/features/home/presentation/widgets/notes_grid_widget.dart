@@ -67,7 +67,7 @@ class NotesGrid extends StatelessWidget {
                       children: [
                         Text(
                           note['content'] ?? 'No Content',
-                          maxLines: 9,
+                          maxLines: 12,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(fontSize: 14.sp),
                         ),

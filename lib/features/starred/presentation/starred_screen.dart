@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
+import '../../../common_widgets/not_found_widget.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -201,8 +202,16 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
         drawer: CustomDrawer(),
         body: _filteredNotes.isEmpty
             ? Center(
-                child: Text("Not Found"),
-              )
+                child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Data Not Found',
+                    style: TextFontStyle.textStylec17cA1ABCCInter700,
+                  ),
+                  NotFoundWidget(),
+                ],
+              ))
             : GridView.builder(
                 padding: EdgeInsets.all(12.sp),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -256,7 +265,7 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                                 children: [
                                   Text(
                                     note['content'] ?? 'No Content',
-                                    maxLines: 9,
+                                    maxLines: 12,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                         fontSize: 14.sp, color: Colors.black),
