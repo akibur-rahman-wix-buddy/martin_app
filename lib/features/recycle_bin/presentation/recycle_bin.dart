@@ -164,9 +164,14 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
               ? DateTime.parse(note['deletedAt'])
               : null;
 
-          int daysSinceDeleted = deletedAt != null
-              ? DateTime.now().difference(deletedAt).inDays
-              : 0;
+          // int daysSinceDeleted = deletedAt != null
+          //     ? DateTime.now().difference(deletedAt).inDays
+          //     : 0;
+          DateTime today = DateUtils.dateOnly(DateTime.now());
+          DateTime deletedDate =
+              DateUtils.dateOnly(deletedAt ?? DateTime.now());
+
+          int daysSinceDeleted = today.difference(deletedDate).inDays;
 
           // int daysRemaining = 30 - daysSinceDeleted;
           return GestureDetector(
@@ -259,7 +264,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                             child: Text(
                               daysSinceDeleted == 0
                                   ? 'Deleted today'
-                                  : 'Deleted $daysSinceDeleted days ago',
+                                  : ' $daysSinceDeleted days',
                               style:
                                   TextStyle(fontSize: 12, color: Colors.white),
                               textAlign: TextAlign.center,
