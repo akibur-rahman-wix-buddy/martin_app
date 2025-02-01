@@ -170,4 +170,14 @@ class DatabaseHelper {
       orderBy: 'createAt DESC',
     );
   }
+
+  Future<void> toggleFavouriteStatus(int noteId, bool isFavourite) async {
+    final db = await database;
+    await db.update(
+      'notes',
+      {'starred': isFavourite ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [noteId],
+    );
+  }
 }

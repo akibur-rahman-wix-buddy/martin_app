@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:martin_app/features/starred/presentation/starred_screen.dart';
 
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
@@ -160,6 +161,14 @@ class _HomeScreenState extends State<HomeScreen> {
             _isSearching = false;
             _searchQuery = '';
             _filteredNotes = _notes;
+            _selectedNotes.clear();
+          });
+        } else if (_isSelecting) {
+          setState(() {
+            _isSelecting = false;
+            _searchQuery = '';
+            _filteredNotes = _notes;
+            _selectedNotes.clear();
           });
         } else {
           showMaterialDialog(context);
@@ -214,24 +223,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             PopupMenuButton<String>(
-              onSelected: (String value) {
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              onSelected: (String value) async {
                 if (value == "edit_preview") {
                   setState(() {
-                    _isSelecting = true; // Enable selection mode
-                    _selectedNotes.clear(); // Clear previous selections
+                    _isSelecting = true;
+                    _selectedNotes.clear();
                   });
+                } else if (value == "pin_favourite") {
+                  for (var id in _selectedNotes) {
+                    await DatabaseHelper().toggleFavouriteStatus(id, true);
+                  }
+                  setState(() {
+                    _selectedNotes.clear();
+                    _isSelecting = false;
+                  });
+                  _fetchNotes();
                 }
               },
               itemBuilder: (BuildContext context) => [
                 PopupMenuItem(
                   value: "edit_preview",
-                  child: Row(
-                    children: [
-                      Icon(Icons.edit, color: Colors.black),
-                      SizedBox(width: 10),
-                      Text("Edit Preview"),
-                    ],
-                  ),
+                  child: Text("Edit"),
+                ),
+                PopupMenuItem(
+                  value: "pin_favourite",
+                  child: Text("Pin to Favourite"),
                 ),
               ],
             ),
@@ -536,267 +555,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-// class HomeScreen extends StatefulWidget {
-//   @override
-//   _HomeScreenState createState() => _HomeScreenState();
-// }
-
-// class _HomeScreenState extends State<HomeScreen> {
-//   // [State variables and methods from original code]
-
-//   final ScrollController _scrollController = ScrollController();
-//   bool _isScrolling = false;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _scrollController.addListener(_scrollListener);
-//     _fetchNotes(); // Attach scroll listener
-//     _loadRecentSearches();
-//   }
-
-//   @override
-//   void dispose() {
-//     _scrollController.removeListener(_scrollListener); // Remove listener
-//     _scrollController.dispose();
-//     super.dispose();
-//   }
-
-//   void _scrollListener() {
-//     // Show the button only when scrolling down past 200 pixels
-//     if (_scrollController.offset > 200 && !_isScrolling) {
-//       setState(() {
-//         _isScrolling = true;
-//       });
-//     } else if (_scrollController.offset <= 200 && _isScrolling) {
-//       setState(() {
-//         _isScrolling = false;
-//       });
-//     }
-//   }
-
-//   void _scrollToTop() {
-//     _scrollController.animateTo(
-//       0.0,
-//       duration: Duration(milliseconds: 500),
-//       curve: Curves.easeInOut,
-//     );
-//   }
-
-//   List<Map<String, dynamic>> _notes = [];
-//   List<Map<String, dynamic>> _filteredNotes = [];
-//   List<Map<String, dynamic>> _previousNotes = [];
-//   List<String> _recentSearches = [];
-//   CarouselSliderController _carouselController = CarouselSliderController();
-//   int _currentSlideIndex = 0;
-
-//   bool _isSearching = false;
-//   String _searchQuery = '';
-
-//   Set<int> _selectedNotes = Set<int>();
-
-//   void _fetchNotes() async {
-//     final notes = await DatabaseHelper().getActiveNotes();
-//     setState(() {
-//       _notes = notes;
-//       _filteredNotes = notes;
-//       _previousNotes = notes.take(3).toList();
-//     });
-//   }
-
-//   Future<void> _loadRecentSearches() async {
-//     List<String> searches = await DatabaseHelper().getRecentSearches();
-//     setState(() {
-//       _recentSearches = searches;
-//     });
-//   }
-
-//   void _deleteSelectedNotes() async {
-//     for (var id in _selectedNotes) {
-//       await DatabaseHelper().moveToRecycleBin(id);
-//     }
-//     setState(() {
-//       _selectedNotes.clear();
-//     });
-//     _fetchNotes();
-//   }
-
-//   void _toggleNoteSelection(int noteId) {
-//     setState(() {
-//       if (_isSelecting) {
-//         if (_selectedNotes.contains(noteId)) {
-//           _selectedNotes.remove(noteId);
-//         } else {
-//           _selectedNotes.add(noteId);
-//         }
-
-//         // If no notes are selected, exit selection mode
-//         if (_selectedNotes.isEmpty) {
-//           _isSelecting = false;
-//         }
-//       }
-//     });
-//   }
-
-//   // void _onSearchQueryChanged(String query) {
-//   //   setState(() {
-//   //     _searchQuery = query;
-//   //     _filteredNotes = _notes.where((note) {
-//   //       final content = note['content']?.toLowerCase() ?? '';
-//   //       return content.contains(query.toLowerCase());
-//   //     }).toList();
-//   //   });
-//   // }
-
-//   void _onSearchQueryChanged(String query) {
-//     setState(() {
-//       _searchQuery = query;
-//       _filteredNotes = _notes.where((note) {
-//         final content = note['content']?.toLowerCase() ?? '';
-//         return content.contains(query.toLowerCase());
-//       }).toList();
-//     });
-
-//     // Save the query to the database
-//     DatabaseHelper().addSearchQuery(query);
-//   }
-
-//   void _clearSearchHistory() async {
-//     await DatabaseHelper().clearRecentSearches();
-//     setState(() {
-//       // Update your UI if necessary
-//     });
-//   }
-
-//   bool _isSelecting = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return PopScope(
-//       canPop: false,
-//       onPopInvokedWithResult: (bool didPop, _) async {
-//         showMaterialDialog(context);
-//       },
-//       child: Scaffold(
-//         appBar: AppBar(
-//           elevation: 1,
-//           shadowColor: AppColors.cFFFFFF,
-//           iconTheme: IconThemeData(
-//             color: Colors.black,
-//           ),
-//           title: _isSearching
-//               ? TextField(
-//                   autofocus: true,
-//                   onChanged: _onSearchQueryChanged,
-//                   decoration: InputDecoration(
-//                     hintText: 'Search Notes...',
-//                     hintStyle: TextStyle(color: Colors.black),
-//                     border: InputBorder.none,
-//                   ),
-//                   style: TextStyle(color: Colors.black),
-//                 )
-//               : Text(
-//                   _selectedNotes.isEmpty
-//                       ? 'All Notes (${_filteredNotes.length})'
-//                       : '${_selectedNotes.length} Selected',
-//                   style: TextFontStyle.textStylec17cA1ABCCInter700,
-//                 ),
-//           actions: [
-//             if (_selectedNotes.isNotEmpty)
-//               IconButton(
-//                 icon: Icon(Icons.delete, color: Colors.red),
-//                 onPressed: _deleteSelectedNotes,
-//               ),
-//             InkWell(
-//               onTap: () {
-//                 setState(() {
-//                   _isSearching = !_isSearching;
-//                 });
-//               },
-//               child: Padding(
-//                 padding: EdgeInsets.all(4.sp),
-//                 child: Image.asset(Assets.icons.searchIcon.path),
-//               ),
-//             ),
-//             PopupMenuButton<String>(
-//               onSelected: (String value) {
-//                 if (value == "edit_preview") {
-//                   setState(() {
-//                     _isSelecting = true; // Enable selection mode
-//                     _selectedNotes.clear(); // Clear previous selections
-//                   });
-//                 }
-//               },
-//               itemBuilder: (BuildContext context) => [
-//                 PopupMenuItem(
-//                   value: "edit_preview",
-//                   child: Row(
-//                     children: [
-//                       Icon(Icons.edit, color: Colors.black),
-//                       SizedBox(width: 10),
-//                       Text("Edit Preview"),
-//                     ],
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//         drawer: CustomDrawer(),
-//         body: Stack(
-//           children: [
-//             SingleChildScrollView(
-//                 controller: _scrollController,
-//                 child: Column(
-//                   children: [
-//                     _isSearching
-//                         ? SizedBox.shrink()
-//                         : Column(
-//                             children: [
-//                               NotesCarousel(
-//                                 previousNotes: _previousNotes,
-//                                 currentSlideIndex: _currentSlideIndex,
-//                                 carouselController: _carouselController,
-//                               ),
-//                               UIHelper.verticalSpace(6.h),
-//                               NotesGrid(
-//                                 filteredNotes: _filteredNotes,
-//                                 selectedNotes: _selectedNotes,
-//                                 isSelecting: _isSelecting,
-//                                 toggleNoteSelection: _toggleNoteSelection,
-//                                 onNoteTap: (id) {
-//                                   Navigator.push(
-//                                     context,
-//                                     MaterialPageRoute(
-//                                       builder: (_) => NoteEditorScreen(
-//                                         note: _filteredNotes.firstWhere(
-//                                             (note) => note['id'] == id),
-//                                         onSave: _fetchNotes,
-//                                       ),
-//                                     ),
-//                                   );
-//                                 },
-//                               ),
-//                             ],
-//                           ),
-//                   ],
-//                 )),
-//             if (_isScrolling) ScrollToTopButton(onTap: _scrollToTop),
-//           ],
-//         ),
-//         floatingActionButton: FloatingActionButton(
-//           foregroundColor: AppColors.cFFFFFF,
-//           backgroundColor: AppColors.cA1ABCC,
-//           onPressed: () => Navigator.push(
-//             context,
-//             MaterialPageRoute(
-//               builder: (_) => NoteEditorScreen(onSave: _fetchNotes),
-//             ),
-//           ),
-//           child: Icon(Icons.add),
-//         ),
-//       ),
-//     );
-//   }
-// }
