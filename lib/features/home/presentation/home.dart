@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:martin_app/features/starred/presentation/starred_screen.dart';
 
+import '../../../common_widgets/not_found_widget.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
@@ -62,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _notes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
   List<Map<String, dynamic>> _previousNotes = [];
+
   List<String> _recentSearches = [];
   CarouselSliderController _carouselController = CarouselSliderController();
   int _currentSlideIndex = 0;
@@ -218,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   });
                 },
                 child: Padding(
-                  padding: EdgeInsets.all(4.sp),
+                  padding: EdgeInsets.all(8.sp),
                   child: Image.asset(Assets.icons.searchIcon.path),
                 ),
               ),
@@ -259,261 +261,280 @@ class _HomeScreenState extends State<HomeScreen> {
         drawer: CustomDrawer(),
         body: Stack(
           children: [
-            SingleChildScrollView(
-              controller: _scrollController,
-              child: Column(
-                children: [
-                  UIHelper.verticalSpace(4.h),
-                  _isSearching
-                      ? SizedBox.shrink()
-                      : Column(
-                          children: [
-                            Text(
-                              'Previous Notes',
-                              style:
-                                  TextFontStyle.textStylec17cA09E9EPoppins700,
-                            ),
-                            UIHelper.verticalSpace(4.h),
-                            if (_previousNotes.isNotEmpty)
-                              Stack(
-                                children: [
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 24.w),
-                                    child: CarouselSlider(
-                                      carouselController: _carouselController,
-                                      options: CarouselOptions(
-                                        height: 122.h,
-                                        viewportFraction: 1,
-                                        autoPlay: true,
-                                        enlargeCenterPage: true,
-                                        onPageChanged: (index, reason) {
-                                          setState(() {
-                                            _currentSlideIndex = index;
-                                          });
+            if (_previousNotes.isNotEmpty)
+              SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  children: [
+                    UIHelper.verticalSpace(4.h),
+                    _isSearching
+                        ? SizedBox.shrink()
+                        : Column(
+                            children: [
+                              Text(
+                                'Previous Notes',
+                                style:
+                                    TextFontStyle.textStylec17cA09E9EPoppins700,
+                              ),
+                              UIHelper.verticalSpace(4.h),
+                              if (_previousNotes.isNotEmpty)
+                                Stack(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 24.w),
+                                      child: CarouselSlider(
+                                        carouselController: _carouselController,
+                                        options: CarouselOptions(
+                                          height: 122.h,
+                                          viewportFraction: 1,
+                                          autoPlay: true,
+                                          enlargeCenterPage: true,
+                                          onPageChanged: (index, reason) {
+                                            setState(() {
+                                              _currentSlideIndex = index;
+                                            });
+                                          },
+                                        ),
+                                        items: _previousNotes.map((note) {
+                                          return Container(
+                                            width: double.infinity,
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 8.w),
+                                            padding: EdgeInsets.all(10.sp),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.cEFF0F3,
+                                              borderRadius:
+                                                  BorderRadius.circular(22.r),
+                                            ),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(height: 5),
+                                                Text(
+                                                  note['content'] ??
+                                                      'No Content',
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style:
+                                                      TextStyle(fontSize: 14),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 0,
+                                      top: 35.h,
+                                      child: IconButton(
+                                        icon: Icon(Icons.arrow_back_ios,
+                                            size: 20.sp,
+                                            color: AppColors.cBFBBBB),
+                                        onPressed: () {
+                                          if (_currentSlideIndex > 0) {
+                                            _carouselController.previousPage();
+                                          }
                                         },
                                       ),
-                                      items: _previousNotes.map((note) {
-                                        return Container(
-                                          width: double.infinity,
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 8.w),
-                                          padding: EdgeInsets.all(10.sp),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.cEFF0F3,
-                                            borderRadius:
-                                                BorderRadius.circular(22.r),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              SizedBox(height: 5),
-                                              Text(
-                                                note['content'] ?? 'No Content',
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(fontSize: 14),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      }).toList(),
                                     ),
-                                  ),
-                                  Positioned(
-                                    left: 0,
-                                    top: 35.h,
-                                    child: IconButton(
-                                      icon: Icon(Icons.arrow_back_ios,
-                                          size: 20.sp,
-                                          color: AppColors.cBFBBBB),
-                                      onPressed: () {
-                                        if (_currentSlideIndex > 0) {
-                                          _carouselController.previousPage();
-                                        }
-                                      },
+                                    Positioned(
+                                      right: -5,
+                                      top: 35.h,
+                                      child: IconButton(
+                                        icon: Icon(Icons.arrow_forward_ios,
+                                            size: 20.sp,
+                                            color: AppColors.cBFBBBB),
+                                        onPressed: () {
+                                          if (_currentSlideIndex <
+                                              _previousNotes.length - 1) {
+                                            _carouselController.nextPage();
+                                          }
+                                        },
+                                      ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    right: -5,
-                                    top: 35.h,
-                                    child: IconButton(
-                                      icon: Icon(Icons.arrow_forward_ios,
-                                          size: 20.sp,
-                                          color: AppColors.cBFBBBB),
-                                      onPressed: () {
-                                        if (_currentSlideIndex <
-                                            _previousNotes.length - 1) {
-                                          _carouselController.nextPage();
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 50.w,
-                                    bottom: 8.h,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: List.generate(
-                                        _previousNotes.length,
-                                        (index) => Container(
-                                          width: 8.w,
-                                          height: 8.h,
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 4.w),
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: _currentSlideIndex == index
-                                                ? Colors.black
-                                                : Colors.grey,
+                                    Positioned(
+                                      right: 50.w,
+                                      bottom: 8.h,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: List.generate(
+                                          _previousNotes.length,
+                                          (index) => Container(
+                                            width: 8.w,
+                                            height: 8.h,
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 4.w),
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: _currentSlideIndex == index
+                                                  ? Colors.black
+                                                  : Colors.grey,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
+                                  ],
+                                ),
+                              UIHelper.verticalSpace(6.h),
+                              Text(
+                                'Learning from mistakes - 09/03',
+                                style: TextFontStyle
+                                    .textStylec17cA09E9EPoppins700
+                                    .copyWith(fontSize: 16.sp),
+                              ),
+                              UIHelper.verticalSpace(6.h),
+                              Text(
+                                'All Notes (${_filteredNotes.length})',
+                                style:
+                                    TextFontStyle.textStylec17cA1ABCCInter700,
+                              ),
+                            ],
+                          ),
+                    GridView.builder(
+                      padding: EdgeInsets.all(12.sp),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 30.w,
+                        childAspectRatio: 0.5,
+                      ),
+                      itemCount: _filteredNotes.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final note = _filteredNotes[index];
+                        bool isSelected = _selectedNotes.contains(note['id']);
+
+                        return GestureDetector(
+                          onLongPress: () {
+                            setState(() {
+                              _isSelecting = true;
+                            });
+                            _toggleNoteSelection(note['id']);
+                          },
+                          onTap: () {
+                            if (_selectedNotes.isEmpty) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => NoteEditorScreen(
+                                    note: note,
+                                    onSave: _fetchNotes,
                                   ),
+                                ),
+                              );
+                            } else {
+                              // Handle selection mode
+                              _toggleNoteSelection(note['id']);
+                            }
+                          },
+                          child: Column(
+                            children: [
+                              Stack(
+                                children: [
+                                  AnimatedContainer(
+                                    height: 250.h,
+                                    width: double.infinity,
+                                    duration: Duration(milliseconds: 200),
+                                    margin: EdgeInsets.all(4.sp),
+                                    padding: EdgeInsets.all(12.sp),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cFFFFFF,
+                                      borderRadius: BorderRadius.circular(22.r),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          note['content'] ?? 'No Content',
+                                          maxLines: 12,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Colors.black),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  if (_isSelecting)
+                                    Positioned(
+                                      top: 8.sp,
+                                      right: 8.sp,
+                                      child: Container(
+                                        height: 25.h,
+                                        width: 25.w,
+                                        padding: EdgeInsets.zero,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? Colors.red
+                                                : Colors.grey,
+                                            width: 2,
+                                          ),
+                                        ),
+                                        child: Transform.scale(
+                                          scale: 1.2,
+                                          child: Checkbox(
+                                            value: isSelected,
+                                            onChanged: (bool? value) {
+                                              _toggleNoteSelection(note['id']);
+                                            },
+                                            activeColor: Colors.red,
+                                            checkColor: Colors.white,
+                                            shape: CircleBorder(),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
-                            UIHelper.verticalSpace(6.h),
-                            Text(
-                              'Learning from mistakes - 09/03',
-                              style: TextFontStyle.textStylec17cA09E9EPoppins700
-                                  .copyWith(fontSize: 16.sp),
-                            ),
-                            UIHelper.verticalSpace(6.h),
-                            Text(
-                              'All Notes (${_filteredNotes.length})',
-                              style: TextFontStyle.textStylec17cA1ABCCInter700,
-                            ),
-                          ],
-                        ),
-                  GridView.builder(
-                    padding: EdgeInsets.all(12.sp),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 30.w,
-                      childAspectRatio: 0.5,
-                    ),
-                    itemCount: _filteredNotes.length,
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      final note = _filteredNotes[index];
-                      bool isSelected = _selectedNotes.contains(note['id']);
-
-                      return GestureDetector(
-                        onLongPress: () {
-                          setState(() {
-                            _isSelecting = true;
-                          });
-                          _toggleNoteSelection(note['id']);
-                        },
-                        onTap: () {
-                          if (_selectedNotes.isEmpty) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => NoteEditorScreen(
-                                  note: note,
-                                  onSave: _fetchNotes,
-                                ),
+                              Text(
+                                note['title'] ?? 'No title',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    TextFontStyle.textStylec17cA1ABCCInter700,
                               ),
-                            );
-                          } else {
-                            // Handle selection mode
-                            _toggleNoteSelection(note['id']);
-                          }
-                        },
-                        child: Column(
-                          children: [
-                            Stack(
-                              children: [
-                                AnimatedContainer(
-                                  height: 250.h,
-                                  width: double.infinity,
-                                  duration: Duration(milliseconds: 200),
-                                  margin: EdgeInsets.all(4.sp),
-                                  padding: EdgeInsets.all(12.sp),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.cFFFFFF,
-                                    borderRadius: BorderRadius.circular(22.r),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        note['content'] ?? 'No Content',
-                                        maxLines: 9,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: Colors.black),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (_isSelecting)
-                                  Positioned(
-                                    top: 8.sp,
-                                    right: 8.sp,
-                                    child: Container(
-                                      height: 25.h,
-                                      width: 25.w,
-                                      padding: EdgeInsets.zero,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? Colors.red
-                                              : Colors.grey,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Transform.scale(
-                                        scale: 1.2,
-                                        child: Checkbox(
-                                          value: isSelected,
-                                          onChanged: (bool? value) {
-                                            _toggleNoteSelection(note['id']);
-                                          },
-                                          activeColor: Colors.red,
-                                          checkColor: Colors.white,
-                                          shape: CircleBorder(),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            Text(
-                              note['title'] ?? 'No title',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextFontStyle.textStylec17cA1ABCCInter700,
-                            ),
-                            UIHelper.verticalSpace(4.h),
-                            Text(
-                              note['createAt'] != null
-                                  ? DateFormat('h:mm a')
-                                      .format(DateTime.parse(note['createAt']))
-                                  : 'No Title',
-                              style: TextFontStyle.textStylec17cA1ABCCInter700
-                                  .copyWith(fontSize: 12.sp),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                              UIHelper.verticalSpace(4.h),
+                              Text(
+                                note['createAt'] != null
+                                    ? DateFormat('h:mm a').format(
+                                        DateTime.parse(note['createAt']))
+                                    : 'No Title',
+                                style: TextFontStyle.textStylec17cA1ABCCInter700
+                                    .copyWith(fontSize: 12.sp),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              )
+            else
+              Center(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Data Not Found',
+                    style: TextFontStyle.textStylec17cA1ABCCInter700,
                   ),
+                  NotFoundWidget(),
                 ],
-              ),
-            ),
+              )),
             if (_isScrolling)
               Positioned(
                 bottom: 20.h,
@@ -535,7 +556,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-              ),
+              )
           ],
         ),
         floatingActionButton: FloatingActionButton(

@@ -56,6 +56,9 @@ class $AssetsLottieGen {
   /// File path: assets/lottie/empty_screen.json
   String get emptyScreen => 'assets/lottie/empty_screen.json';
 
+  /// File path: assets/lottie/empty_widget.json
+  String get emptyWidget => 'assets/lottie/empty_widget.json';
+
   /// File path: assets/lottie/favourite.json
   String get favourite => 'assets/lottie/favourite.json';
 
@@ -93,6 +96,15 @@ class $AssetsLottieGen {
   /// File path: assets/lottie/not_found.json
   String get notFound => 'assets/lottie/not_found.json';
 
+  /// File path: assets/lottie/not_found_1.json
+  String get notFound1 => 'assets/lottie/not_found_1.json';
+
+  /// File path: assets/lottie/not_found_data.json
+  String get notFoundData => 'assets/lottie/not_found_data.json';
+
+  /// File path: assets/lottie/not_found_lottie.json
+  String get notFoundLottie => 'assets/lottie/not_found_lottie.json';
+
   /// File path: assets/lottie/rating.json
   String get rating => 'assets/lottie/rating.json';
 
@@ -118,6 +130,7 @@ class $AssetsLottieGen {
         birdRing,
         cartIsEmpty,
         emptyScreen,
+        emptyWidget,
         favourite,
         hamburger,
         imageShimmer,
@@ -130,6 +143,9 @@ class $AssetsLottieGen {
         lottieListLoading,
         lottieRoundFoodLoading,
         notFound,
+        notFound1,
+        notFoundData,
+        notFoundLottie,
         rating,
         removeFromCart,
         restaurantLoading,
