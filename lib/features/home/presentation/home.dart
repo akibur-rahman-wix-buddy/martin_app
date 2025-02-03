@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:martin_app/features/starred/presentation/starred_screen.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../common_widgets/not_found_widget.dart';
 import '../../../constants/text_font_style.dart';
@@ -119,6 +123,89 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+//  Future<void> _downloadSelectedNotes() async {
+//   try {
+//     final directory = await getExternalStorageDirectory();
+//     if (directory == null) {
+//       throw Exception("Unable to access storage directory");
+//     }
+
+//     final notesFolder = Directory('${directory.path}/Notes');
+//     if (!await notesFolder.exists()) {
+//       await notesFolder.create(recursive: true);
+//     }
+
+//     for (var noteId in _selectedNotes) {
+//       final note = _notes.firstWhere((n) => n['id'] == noteId);
+//       final fileName = 'Note_${note['id']}.txt';
+//       final file = File('${notesFolder.path}/$fileName');
+
+//       await file.writeAsString(
+//         'Title: ${note['title']}\n\nContent: ${note['content']}',
+//       );
+
+//       // Print the file path for debugging
+//       print('File saved at: ${file.path}');
+//     }
+
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text('Notes downloaded successfully!')),
+//     );
+//   } catch (e) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       SnackBar(content: Text('Failed to download notes: $e')),
+//     );
+//   }
+// }
+
+  Future<void> _requestPermissionsAndDownload() async {
+    if (await Permission.storage.request().isGranted ||
+        await Permission.manageExternalStorage.request().isGranted) {
+      _downloadSelectedNotes();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Storage permission required!')),
+      );
+    }
+  }
+
+  Future<void> _downloadSelectedNotes() async {
+    try {
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = Directory(
+            '/storage/emulated/0/Download'); // Android Downloads folder
+      } else if (Platform.isIOS) {
+        directory =
+            await getApplicationDocumentsDirectory(); // iOS: App Documents folder
+      }
+
+      if (directory == null) {
+        throw Exception("Unable to access storage directory");
+      }
+
+      for (var noteId in _selectedNotes) {
+        final note = _notes.firstWhere((n) => n['id'] == noteId);
+        final fileName = 'Note_${note['id']}.txt';
+        final file = File('${directory.path}/$fileName');
+
+        await file.writeAsString(
+          'Title: ${note['title']}\n\nContent: ${note['content']}',
+        );
+
+        print('File saved at: ${file.path}');
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Notes downloaded to Downloads folder!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download notes: $e')),
+      );
+    }
+  }
+
   // void _onSearchQueryChanged(String query) {
   //   setState(() {
   //     _searchQuery = query;
@@ -207,11 +294,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextFontStyle.textStylec17cA1ABCCInter700,
                 ),
           actions: [
-            if (_selectedNotes.isNotEmpty)
+            if (_selectedNotes.isNotEmpty) ...[
+              IconButton(
+                icon: Icon(Icons.download, color: Colors.blue),
+                onPressed:
+                    _requestPermissionsAndDownload, // Download selected notes
+              ),
               IconButton(
                 icon: Icon(Icons.delete, color: Colors.red),
                 onPressed: _deleteSelectedNotes,
               ),
+            ],
             if (!_isSelecting)
               InkWell(
                 onTap: () {
@@ -493,6 +586,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                             shape: CircleBorder(),
                                           ),
                                         ),
+                                      ),
+                                    ),
+                                  if (!_isSelecting)
+                                    Positioned(
+                                      bottom: 8.sp,
+                                      right: 8.sp,
+                                      child: IconButton(
+                                        icon: Icon(Icons.download,
+                                            color: Colors.blue),
+                                        onPressed: () =>
+                                            _requestPermissionsAndDownload(),
                                       ),
                                     ),
                                 ],
