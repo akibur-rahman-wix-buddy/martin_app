@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:martin_app/features/home/presentation/home.dart';
+import 'package:martin_app/features/lock_notes/presentation/lock_notes.dart';
 import 'package:martin_app/features/recycle_bin/presentation/recycle_bin.dart';
 import 'package:martin_app/features/starred/presentation/starred_screen.dart';
 
@@ -13,6 +14,7 @@ final class Routes {
   static const String recycleBinScreen = '/recycle_bin_screen';
   static const String homeScreen = '/home_screen';
   static const String starredScreen = '/starred_screen';
+  static const String lockNotesScreen = '/lock_notes_screen';
 }
 
 final class RouteGenerator {
@@ -38,6 +40,12 @@ final class RouteGenerator {
             ? _FadedTransitionRoute(
                 widget: StarredNotesScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => StarredNotesScreen());
+
+      case Routes.lockNotesScreen:
+        return Platform.isAndroid
+            ? _FadedTransitionRoute(
+                widget: LockNotesScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => LockNotesScreen());
 
       // // case Routes.categorySearchScreen:
       // //   return Platform.isAndroid

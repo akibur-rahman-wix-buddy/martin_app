@@ -96,6 +96,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
             _scaffoldKey.currentState?.openDrawer();
           },
         ),
+        titleSpacing: 0,
         title: Row(
           children: [
             Text(
@@ -103,14 +104,15 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                     ? 'Recycle Bin'
                     : '${_selectedNotes.length} Selected',
                 style: TextStyle(color: Colors.black)),
-            Text(' (${_recycleBinNotes.length} notes)',
-                style: TextStyle(color: Colors.black, fontSize: 14.sp)),
+            if (!_isSelecting)
+              Text(' (${_recycleBinNotes.length} notes)',
+                  style: TextStyle(color: Colors.black, fontSize: 15.sp)),
           ],
         ),
         actions: [
           if (!_isSelecting)
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.sp),
               child: InkWell(
                 onTap: () {
                   setState(() {
@@ -128,9 +130,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
             InkWell(
                 onTap: _restoreSelectedNotes,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: Text('Restore',
-                      style: TextStyle(color: Colors.black, fontSize: 16.sp)),
+                      style: TextStyle(color: Colors.black, fontSize: 14.sp)),
                 )),
           if (_selectedNotes.isNotEmpty)
             InkWell(
@@ -142,9 +144,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                 },
                 child: Padding(
                   padding:
-                      EdgeInsets.symmetric(vertical: 16.h, horizontal: 16.w),
+                      EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
                   child: Text('Delete',
-                      style: TextStyle(color: Colors.black, fontSize: 16.sp)),
+                      style: TextStyle(color: Colors.black, fontSize: 14.sp)),
                 )),
         ],
       ),
@@ -208,9 +210,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                             child: Expanded(
                               child: Text(
                                 note['content'] ?? 'No Content',
-                                maxLines: 11,
+                                maxLines: 10,
                                 overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.left,
+                                textAlign: TextAlign.justify,
                               ),
                             ),
                           ),

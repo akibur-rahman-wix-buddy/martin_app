@@ -12,6 +12,9 @@ import 'package:flutter/widgets.dart';
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
+  /// File path: assets/icons/lock.png
+  AssetGenImage get lock => const AssetGenImage('assets/icons/lock.png');
+
   /// File path: assets/icons/more.png
   AssetGenImage get more => const AssetGenImage('assets/icons/more.png');
 
@@ -20,7 +23,7 @@ class $AssetsIconsGen {
       const AssetGenImage('assets/icons/search_icon.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [more, searchIcon];
+  List<AssetGenImage> get values => [lock, more, searchIcon];
 }
 
 class $AssetsImagesGen {
