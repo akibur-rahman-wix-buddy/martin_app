@@ -68,18 +68,6 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
     });
   }
 
-  // void _toggleStarredStatus(int noteId) async {
-  //   final note = _starredNotes.firstWhere((note) => note['id'] == noteId);
-  //   final isStarred = note['isStarred'] == 1;
-  //   await DatabaseHelper().updateNote(
-  //     noteId,
-  //     note['title'],
-  //     note['content'],
-  //     starred: !isStarred, // Toggle starred status
-  //   );
-  //   _loadStarredNotes(); // Refresh the list
-  // }
-
   String _formatDate(String? dateString) {
     if (dateString == null) return 'No Date';
 
