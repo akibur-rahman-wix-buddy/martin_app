@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:martin_app/constants/text_font_style.dart';
+import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:martin_app/helpers/navigation_service.dart';
 
 import '../../../database/db_helper.dart';
@@ -18,6 +19,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   bool _isStarred = false;
+  bool _isLocked = false;
 
   void _toggleStarred() {
     setState(() {
@@ -33,6 +35,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       _titleController.text = widget.note!['title'];
       _contentController.text = widget.note!['content'];
       _isStarred = widget.note!['starred'] == 1;
+      _isLocked = widget.note!['locked'] == 1;
     }
   }
 
@@ -54,36 +57,25 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     widget.onSave();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   if (widget.note != null) {
-  //     _titleController.text = widget.note!['title'];
-  //     _contentController.text = widget.note!['content'];
-  //   }
-  // }
-
-  // Future<void> _saveNote() async {
-  //   final title = _titleController.text.trim();
-  //   final content = _contentController.text.trim();
-
-  //   if (title.isEmpty || content.isEmpty) {
-  //     return; // Prevent saving empty notes.
-  //   }
-
-  //   if (widget.note == null) {
-  //     await DatabaseHelper().addNote(title, content);
-  //   } else {
-  //     await DatabaseHelper().updateNote(widget.note!['id'], title, content);
-  //   }
-
-  //   widget.onSave();
-  // }
-
   Future<bool> _onBackPressed() async {
     await _saveNote();
     Navigator.pop(context);
     return Future.value(false);
+  }
+
+  void _lockNote() async {
+    if (widget.note != null) {
+      showLockNotesDialog(
+        context,
+        widget.note!['id'],
+        () {
+          setState(() {
+            _isLocked = true;
+          });
+          widget.onSave();
+        },
+      );
+    }
   }
 
   @override
@@ -133,19 +125,20 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       Text("Lock"),
                     ],
                   ),
+                  onTap: () {
+                    if (widget.note != null) {
+                      showLockNotesDialog(
+                        context,
+                        widget.note!['id'],
+                        () {
+                          setState(() {}); // Refresh UI after locking
+                        },
+                      );
+                    }
+                  },
                 ),
               ],
             ),
-            // IconButton(
-            //   icon: Icon(
-            //     Icons.save,
-            //     color: Colors.red,
-            //   ),
-            //   onPressed: () {
-            //     _saveNote();
-            //     Navigator.pop(context);
-            //   },
-            // ),
           ],
         ),
         body: Padding(

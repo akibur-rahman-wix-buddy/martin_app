@@ -25,7 +25,9 @@ class DatabaseHelper {
           createAt TEXT,
           isDeleted INTEGER DEFAULT 0,
           deletedAt TEXT,
-          starred INTEGER DEFAULT 0
+          starred INTEGER DEFAULT 0,
+          isLocked INTEGER DEFAULT 0,
+          password TEXT
     )''');
     });
   }
@@ -179,5 +181,72 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [noteId],
     );
+  }
+
+  //lock database
+  // Future<void> lockNote(int noteId, String password) async {
+  //   final db = await database;
+  //   await db.update(
+  //     'notes',
+  //     {'isLocked': 1, 'password': password},
+  //     where: 'id = ?',
+  //     whereArgs: [noteId],
+  //   );
+  // }
+
+  // Future<bool> unlockNote(int noteId, String enteredPassword) async {
+  //   final db = await database;
+  //   final result = await db.query(
+  //     'notes',
+  //     columns: ['password'],
+  //     where: 'id = ?',
+  //     whereArgs: [noteId],
+  //     limit: 1,
+  //   );
+
+  //   if (result.isNotEmpty && result.first['password'] == enteredPassword) {
+  //     await db.update(
+  //       'notes',
+  //       {'isLocked': 0, 'password': null},
+  //       where: 'id = ?',
+  //       whereArgs: [noteId],
+  //     );
+  //     return true;
+  //   }
+  //   return false;
+  // }
+
+  // Future<List<Map<String, dynamic>>> getLockedNotes() async {
+  //   final db = await database;
+  //   return db.query(
+  //     'notes',
+  //     where: 'isLocked = ?',
+  //     whereArgs: [1],
+  //   );
+  // }
+
+  Future<void> lockNote(int noteId, String password) async {
+    final db = await database;
+    await db.update(
+      'notes',
+      {'isLocked': 1, 'password': password},
+      where: 'id = ?',
+      whereArgs: [noteId],
+    );
+  }
+
+  Future<void> unlockNote(int id) async {
+    final db = await database;
+    await db.update(
+      'notes',
+      {'isLocked': 0, 'password': null},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getLockedNotes() async {
+    final db = await database;
+    return await db.query('notes', where: 'isLocked = ?', whereArgs: [1]);
   }
 }

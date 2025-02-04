@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:martin_app/common_widgets/custom_textfeild.dart';
-import 'package:martin_app/helpers/ui_helpers.dart';
+import '../../../../common_widgets/custom_textfeild.dart';
+import '../../../../helpers/ui_helpers.dart';
+import '../../../database/db_helper.dart';
 
-void showLockNotesDialog(BuildContext context, VoidCallback onDelete) {
+void showLockNotesDialog(
+    BuildContext context, int noteId, VoidCallback onLock) {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
@@ -10,11 +12,11 @@ void showLockNotesDialog(BuildContext context, VoidCallback onDelete) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Lock Notes'),
+        title: const Text('Lock Note'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Are you sure you want to lock your notes?'),
+            const Text('Set a password to lock this note'),
             UIHelper.verticalSpaceSmall,
             CustomTextFormField(
               controller: passwordController,
@@ -29,22 +31,20 @@ void showLockNotesDialog(BuildContext context, VoidCallback onDelete) {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              String password = passwordController.text;
-              String confirmPassword = confirmPasswordController.text;
-
-              if (password.isNotEmpty && password == confirmPassword) {
-                onDelete();
-                Navigator.of(context).pop();
+            onPressed: () async {
+              if (passwordController.text == confirmPasswordController.text &&
+                  passwordController.text.isNotEmpty) {
+                await DatabaseHelper()
+                    .lockNote(noteId, passwordController.text);
+                onLock(); // Refresh UI after locking
+                Navigator.pop(context);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Passwords do not match!')),
+                  const SnackBar(content: Text('Passwords do not match!')),
                 );
               }
             },

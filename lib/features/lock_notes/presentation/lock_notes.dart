@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
+import 'package:martin_app/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
+import '../../database/db_helper.dart';
 
 class LockNotesScreen extends StatefulWidget {
   @override
@@ -14,8 +17,22 @@ class LockNotesScreen extends StatefulWidget {
 
 class _LockNotesScreenState extends State<LockNotesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Map<String, dynamic>> _lockedNotes = [];
 
   bool isSelected = false;
+  @override
+  void initState() {
+    super.initState();
+    _loadLockedNotes();
+  }
+
+  void _loadLockedNotes() async {
+    List<Map<String, dynamic>> lockedNotes =
+        await DatabaseHelper().getLockedNotes();
+    setState(() {
+      _lockedNotes = lockedNotes;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +72,9 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
           crossAxisSpacing: 30.w,
           childAspectRatio: 0.5,
         ),
-        itemCount: 10,
+        itemCount: _lockedNotes.length,
         itemBuilder: (context, index) {
+          final note = _lockedNotes[index];
           return Column(
             children: [
               Stack(
@@ -77,9 +95,16 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                       children: [
                         InkWell(
                           onTap: () {
-                            showLockNotesDialog(
+                            // showLockNotesDialog(
+                            //   context,
+                            //   () => () {},
+                            // );
+
+                            showUnlockDialog(
                               context,
-                              () => () {},
+                              note['id'],
+                              note['password'], // Pass the stored password
+                              () => _loadLockedNotes, // Refresh after unlocking
                             );
                           },
                           child: Center(
@@ -129,14 +154,17 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                 ],
               ),
               Text(
-                'title',
+                note['title'],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextFontStyle.textStylec17cA1ABCCInter700,
               ),
               UIHelper.verticalSpace(4.h),
               Text(
-                'create date',
+                note['createAt'] != null
+                    ? DateFormat('h:mm a')
+                        .format(DateTime.parse(note['createAt']))
+                    : 'No Title',
                 style: TextFontStyle.textStylec17cA1ABCCInter700
                     .copyWith(fontSize: 12.sp),
                 maxLines: 1,
