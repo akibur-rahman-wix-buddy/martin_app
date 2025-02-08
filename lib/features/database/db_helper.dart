@@ -249,4 +249,14 @@ class DatabaseHelper {
     final db = await database;
     return await db.query('notes', where: 'isLocked = ?', whereArgs: [1]);
   }
+
+  Future<void> updateNoteLockStatus(int noteId, int locked) async {
+    final db = await database;
+    await db.update(
+      'notes',
+      {'locked': locked},
+      where: 'id = ?',
+      whereArgs: [noteId],
+    );
+  }
 }

@@ -79,6 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _fetchNotes() async {
     final notes = await DatabaseHelper().getActiveNotes();
+
+    final unlockedNotes = notes.where((note) => note['locked'] == 0).toList();
     setState(() {
       _notes = notes;
       _filteredNotes = notes;

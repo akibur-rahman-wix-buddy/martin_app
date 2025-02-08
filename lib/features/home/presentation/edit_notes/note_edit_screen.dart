@@ -28,6 +28,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _saveNote();
   }
 
+  void _toggleLocked() {
+    setState(() {
+      _isLocked = !_isLocked;
+    });
+    widget.onSave();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,9 +127,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: "lock",
                   child: Row(
                     children: [
-                      Icon(Icons.lock, color: Colors.black),
+                      Icon(_isLocked ? Icons.lock : Icons.lock_open,
+                          color: Colors.black),
                       SizedBox(width: 10),
-                      Text("Lock"),
+                      Text(_isLocked ? "Lock" : "Unlock"),
                     ],
                   ),
                   onTap: () {
