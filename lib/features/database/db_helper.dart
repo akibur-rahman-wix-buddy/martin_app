@@ -122,8 +122,8 @@ class DatabaseHelper {
     final db = await database;
     return db.query(
       'notes',
-      where: 'isDeleted = ?',
-      whereArgs: [0],
+      where: 'isDeleted = ? AND  isLocked = ?',
+      whereArgs: [0, 0],
     );
   }
 
