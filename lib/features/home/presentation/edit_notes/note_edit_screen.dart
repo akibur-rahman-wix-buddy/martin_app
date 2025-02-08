@@ -130,7 +130,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       Icon(_isLocked ? Icons.lock : Icons.lock_open,
                           color: Colors.black),
                       SizedBox(width: 10),
-                      Text(_isLocked ? "Lock" : "Unlock"),
+                      Text(_isLocked ? "Unlock" : "Lock"),
                     ],
                   ),
                   onTap: () {

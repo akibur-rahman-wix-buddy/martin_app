@@ -18,6 +18,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
   List<Map<String, dynamic>> _notes = [];
   List<Map<String, dynamic>> _recycleBinNotes = [];
   List<Map<String, dynamic>> _starredNotes = [];
+  List<Map<String, dynamic>> _lockNotes = [];
   List<String> _uploadedFiles = [];
 
   @override
@@ -25,6 +26,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     super.initState();
     _loadNotes();
     _loadRecycleBinNotes();
+    _loadLockNotes();
     _starredAllNotes();
   }
 
@@ -42,10 +44,17 @@ class _CustomDrawerState extends State<CustomDrawer> {
     });
   }
 
-  Future<void> _starredAllNotes() async {
+  Future<void> _loadLockNotes() async {
     var starredAllNotes = await _dbHelper.getStarredNotes();
     setState(() {
       _starredNotes = starredAllNotes;
+    });
+  }
+
+  Future<void> _starredAllNotes() async {
+    var lockAllNotes = await _dbHelper.getLockedNotes();
+    setState(() {
+      _lockNotes = lockAllNotes;
     });
   }
 
@@ -69,13 +78,13 @@ class _CustomDrawerState extends State<CustomDrawer> {
       }
 
       _loadNotes();
-      setState(() {});
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content:
                 Text('${result.files.length} file(s) uploaded successfully!')),
       );
+      NavigationService.navigateTo(Routes.homeScreen);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('No file selected!')),
@@ -131,6 +140,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
             onTap: () {
               NavigationService.navigateTo(Routes.lockNotesScreen);
             },
+            trailing: Text('${_lockNotes.length}'),
           ),
           Divider(), // Add a separator
           ListTile(
