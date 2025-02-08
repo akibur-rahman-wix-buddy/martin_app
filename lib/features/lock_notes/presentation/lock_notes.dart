@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:martin_app/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
@@ -95,17 +94,11 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                       children: [
                         InkWell(
                           onTap: () {
-                            // showLockNotesDialog(
-                            //   context,
-                            //   () => () {},
-                            // );
-
                             showUnlockDialog(
-                              context,
-                              note['id'],
-                              note['password'], // Pass the stored password
-                              () => _loadLockedNotes, // Refresh after unlocking
-                            );
+                                context, note['id'], note['password'], () {
+                              _loadLockedNotes();
+                              setState(() {});
+                            });
                           },
                           child: Center(
                             child: Image.asset(
@@ -114,13 +107,6 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                             ),
                           ),
                         )
-                        // Text(
-                        //   'Content Data',
-                        //   maxLines: 12,
-                        //   overflow: TextOverflow.ellipsis,
-                        //   style:
-                        //       TextStyle(fontSize: 14.sp, color: Colors.black),
-                        // ),
                       ],
                     ),
                   ),

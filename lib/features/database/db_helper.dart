@@ -122,8 +122,8 @@ class DatabaseHelper {
     final db = await database;
     return db.query(
       'notes',
-      where: 'isDeleted = ?',
-      whereArgs: [0],
+      where: 'isDeleted = ? AND  isLocked = ?',
+      whereArgs: [0, 0],
     );
   }
 
@@ -248,5 +248,15 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getLockedNotes() async {
     final db = await database;
     return await db.query('notes', where: 'isLocked = ?', whereArgs: [1]);
+  }
+
+  Future<void> updateNoteLockStatus(int noteId, int locked) async {
+    final db = await database;
+    await db.update(
+      'notes',
+      {'locked': locked},
+      where: 'id = ?',
+      whereArgs: [noteId],
+    );
   }
 }

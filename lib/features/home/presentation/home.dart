@@ -79,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _fetchNotes() async {
     final notes = await DatabaseHelper().getActiveNotes();
+
     setState(() {
       _notes = notes;
       _filteredNotes = notes;
@@ -124,14 +125,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _requestPermissionsAndDownload(String title, String note) async {
+    String name = getCurrentTime();
     try {
       FileSaver fileSaver = FileSaver();
-      await fileSaver.saveFileToDownload(title, note);
+      await fileSaver.saveFileToDownload(name, note);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text('Notes downloaded successfully to Downloads folder!')),
+        SnackBar(
+            content: Text(
+                'Notes downloaded successfully to \nDownloads folder as $name.txt')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -140,15 +142,28 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  String getCurrentTime() {
+    DateTime now = DateTime.now();
+    int hour = now.hour;
+    String period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour == 0 ? 12 : hour; // Convert 0 hour to 12 for 12 AM
+    return '${hour.toString().padLeft(2, '0')}_${now.minute.toString().padLeft(2, '0')}_${now.second.toString().padLeft(2, '0')}_$period';
+  }
+
   Future<void> _downloadSelectedNotes() async {
+    DateTime now = DateTime.now();
+    print(
+        'Note${now.hour.toString().padLeft(2, '0')}_${now.minute.toString().padLeft(2, '0')}_${now.second.toString().padLeft(2, '0')}');
     if (_selectedNotes.isEmpty) return;
 
     try {
+      getCurrentTime();
       FileSaver fileSaver = FileSaver();
 
       for (var id in _selectedNotes) {
         final note = _notes.firstWhere((note) => note['id'] == id);
-        await fileSaver.saveFileToDownload(note['title'], note['content']);
+        await fileSaver.saveFileToDownload(getCurrentTime(), note['content']);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

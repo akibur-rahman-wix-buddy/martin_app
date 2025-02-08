@@ -132,7 +132,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.h),
                   child: Text('Restore',
-                      style: TextStyle(color: Colors.black, fontSize: 14.sp)),
+                      style: TextStyle(color: Colors.black, fontSize: 12.sp)),
                 )),
           if (_selectedNotes.isNotEmpty)
             InkWell(
@@ -146,7 +146,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                   padding:
                       EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
                   child: Text('Delete',
-                      style: TextStyle(color: Colors.black, fontSize: 14.sp)),
+                      style: TextStyle(color: Colors.black, fontSize: 12.sp)),
                 )),
         ],
       ),
