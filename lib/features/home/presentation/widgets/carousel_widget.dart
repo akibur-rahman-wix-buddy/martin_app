@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../gen/colors.gen.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class NotesCarousel extends StatelessWidget {
   final List<Map<String, dynamic>> previousNotes;
@@ -14,6 +18,20 @@ class NotesCarousel extends StatelessWidget {
     required this.currentSlideIndex,
     required this.carouselController,
   });
+
+  quill.QuillController _controller = quill.QuillController.basic();
+
+  String extractPlainText(String deltaJson) {
+    try {
+      var document =
+          quill.Document.fromJson(jsonDecode(deltaJson) as List<dynamic>);
+      return document.toPlainText();
+    } catch (e) {
+      // If JSON decoding fails, return the original string or an error message
+      print("Error decoding delta JSON: $e");
+      return deltaJson; // Return the original string if it's not valid JSON
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +63,18 @@ class NotesCarousel extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           SizedBox(height: 5),
-                          Text(
-                            note['content'] ?? 'No Content',
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 14),
-                          ),
+                          note['content'] is String
+                              ? Text(
+                                  extractPlainText(note['content']),
+                                  maxLines: 12,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.left,
+                                )
+                              : QuillEditor(
+                                  controller: _controller,
+                                  focusNode: FocusNode(),
+                                  scrollController: ScrollController(),
+                                ),
                         ],
                       ),
                     );
