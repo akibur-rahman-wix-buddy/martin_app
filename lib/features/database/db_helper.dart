@@ -40,12 +40,16 @@ class DatabaseHelper {
   Future<int> addNote(String title, String content,
       {bool starred = false}) async {
     final db = await database;
-    return db.insert('notes', {
-      'title': title,
-      'content': content,
-      'createAt': DateTime.now().toIso8601String(),
-      'starred': starred ? 1 : 0,
-    });
+    return db.insert(
+      'notes',
+      {
+        'title': title,
+        'content': content,
+        'createAt': DateTime.now().toIso8601String(),
+        'starred': starred ? 1 : 0,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   Future<int> updateNote(int id, String title, String content,

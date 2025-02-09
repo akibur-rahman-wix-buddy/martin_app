@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:martin_app/features/home/presentation/widgets/carousel_widget.dart';
 import 'package:martin_app/features/home/presentation/widgets/file_saver.dart';
@@ -16,6 +18,7 @@ import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
 import '../../database/db_helper.dart';
 import 'edit_notes/note_edit_screen.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 import 'package:intl/intl.dart';
 
@@ -26,6 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ScrollController _scrollController = ScrollController();
+  quill.QuillController _controller = quill.QuillController.basic();
   bool _isScrolling = false;
 
   @override
@@ -198,6 +202,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   bool _isSelecting = false;
+  String extractPlainText(String deltaJson) {
+    try {
+      var document =
+          quill.Document.fromJson(jsonDecode(deltaJson) as List<dynamic>);
+      return document.toPlainText();
+    } catch (e) {
+      // If JSON decoding fails, return the original string or an error message
+      print("Error decoding delta JSON: $e");
+      return deltaJson; // Return the original string if it's not valid JSON
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -373,14 +388,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              note['content'] ?? 'No Content',
-                              maxLines: 12,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.left,
-                              style: TextStyle(
-                                  fontSize: 14.sp, color: Colors.black),
-                            ),
+                            note['content'] is String
+                                ? Text(
+                                    extractPlainText(note['content']),
+                                    maxLines: 12,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.left,
+                                  )
+                                : QuillEditor(
+                                    controller: _controller,
+                                    focusNode: FocusNode(),
+                                    scrollController: ScrollController(),
+                                  ),
+                            // Text(
+                            //   note['content'] ?? 'No Content',
+                            //   maxLines: 12,
+                            //   overflow: TextOverflow.ellipsis,
+                            //   textAlign: TextAlign.left,
+                            //   style: TextStyle(
+                            //       fontSize: 14.sp, color: Colors.black),
+                            // ),
                           ],
                         ),
                       ),

@@ -1,15 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:martin_app/constants/text_font_style.dart';
 import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:martin_app/helpers/navigation_service.dart';
-
 import '../../../database/db_helper.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Map<String, dynamic>? note;
   final VoidCallback onSave;
+  final int? noteId;
 
-  NoteEditorScreen({this.note, required this.onSave});
+  NoteEditorScreen({this.note, required this.onSave, this.noteId});
 
   @override
   _NoteEditorScreenState createState() => _NoteEditorScreenState();
@@ -17,7 +19,8 @@ class NoteEditorScreen extends StatefulWidget {
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
+  late QuillController _quillController;
+  bool _isLoading = true; // Loading state for UI
   bool _isStarred = false;
   bool _isLocked = false;
 
@@ -38,30 +41,69 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   @override
   void initState() {
     super.initState();
+    _quillController = QuillController.basic();
     if (widget.note != null) {
+      _loadNote();
       _titleController.text = widget.note!['title'];
-      _contentController.text = widget.note!['content'];
       _isStarred = widget.note!['starred'] == 1;
       _isLocked = widget.note!['locked'] == 1;
+      try {
+        _quillController = QuillController(
+          document: Document.fromJson(jsonDecode(widget.note!['content'])),
+          selection: TextSelection.collapsed(offset: 0),
+        );
+      } catch (e) {
+        print("Error loading note: $e");
+      }
+    } else {
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _saveNote() async {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
+  // Load the existing note from the database
+  Future<void> _loadNote() async {
+    List<Map<String, dynamic>> notes = await DatabaseHelper().getNotes();
+    Map<String, dynamic>? note = notes.firstWhere(
+      (n) => n['id'] == widget.noteId,
+      orElse: () => {},
+    );
 
-    if (title.isEmpty || content.isEmpty) {
+    if (note.isNotEmpty) {
+      _titleController.text = note['title'];
+      try {
+        _quillController = QuillController(
+          document: Document.fromJson(jsonDecode(note['content'])),
+          selection: TextSelection.collapsed(offset: 0),
+        );
+      } catch (e) {
+        print("Error loading note: $e");
+      }
+    }
+
+    setState(() => _isLoading = false);
+  }
+
+  // Save the note (insert or update)
+  Future<void> _saveNote() async {
+    String title = _titleController.text.trim();
+    String contentJson =
+        jsonEncode(_quillController.document.toDelta().toJson());
+
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Title cannot be empty"),
+        backgroundColor: Colors.red,
+      ));
       return;
     }
 
-    if (widget.note == null) {
-      await DatabaseHelper().addNote(title, content, starred: _isStarred);
+    if (widget.noteId == null) {
+      await DatabaseHelper().addNote(title, contentJson);
     } else {
-      await DatabaseHelper()
-          .updateNote(widget.note!['id'], title, content, starred: _isStarred);
+      await DatabaseHelper().updateNote(widget.noteId!, title, contentJson);
     }
 
-    widget.onSave();
+    Navigator.pop(context, true);
   }
 
   Future<bool> _onBackPressed() async {
@@ -97,6 +139,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
+            IconButton(icon: Icon(Icons.save), onPressed: _saveNote),
             PopupMenuButton<String>(
               onSelected: (String value) {
                 if (value == "starred") {
@@ -149,32 +192,32 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: 'Title',
-                  border: InputBorder.none,
-                ),
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _contentController,
-                  decoration: InputDecoration(
-                    hintText: 'Write your note here...',
-                    border: InputBorder.none,
+        body: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            hintText: 'Title',
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  maxLines: null,
-                  expands: true,
-                ),
+                  Expanded(
+                    child: QuillEditor.basic(
+                      controller: _quillController,
+                    ),
+                  ),
+                  QuillToolbar.simple(controller: _quillController),
+                ],
               ),
-            ],
-          ),
-        ),
       ),
     );
   }
