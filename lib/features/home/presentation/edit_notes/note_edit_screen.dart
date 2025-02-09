@@ -9,7 +9,7 @@ import '../../../database/db_helper.dart';
 class NoteEditorScreen extends StatefulWidget {
   final Map<String, dynamic>? note;
   final VoidCallback onSave;
-  final int? noteId;
+  int? noteId; // Must be mutable for dynamic updates
 
   NoteEditorScreen({this.note, required this.onSave, this.noteId});
 
@@ -20,59 +20,26 @@ class NoteEditorScreen extends StatefulWidget {
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final _titleController = TextEditingController();
   late QuillController _quillController;
-  bool _isLoading = true; // Loading state for UI
+  bool _isLoading = true;
   bool _isStarred = false;
   bool _isLocked = false;
-
-  void _toggleStarred() {
-    setState(() {
-      _isStarred = !_isStarred;
-    });
-    _saveNote();
-  }
-
-  void _toggleLocked() {
-    setState(() {
-      _isLocked = !_isLocked;
-    });
-    widget.onSave();
-  }
+  bool _isNewNote = true; // ✅ Track if it's a new note
 
   @override
   void initState() {
     super.initState();
     _quillController = QuillController.basic();
+
     if (widget.note != null) {
-      _loadNote();
+      _isNewNote = false; // ✅ It's an existing note
+      widget.noteId = widget.note!['id']; // ✅ Ensure noteId is assigned
       _titleController.text = widget.note!['title'];
       _isStarred = widget.note!['starred'] == 1;
       _isLocked = widget.note!['locked'] == 1;
+
       try {
         _quillController = QuillController(
           document: Document.fromJson(jsonDecode(widget.note!['content'])),
-          selection: TextSelection.collapsed(offset: 0),
-        );
-      } catch (e) {
-        print("Error loading note: $e");
-      }
-    } else {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // Load the existing note from the database
-  Future<void> _loadNote() async {
-    List<Map<String, dynamic>> notes = await DatabaseHelper().getNotes();
-    Map<String, dynamic>? note = notes.firstWhere(
-      (n) => n['id'] == widget.noteId,
-      orElse: () => {},
-    );
-
-    if (note.isNotEmpty) {
-      _titleController.text = note['title'];
-      try {
-        _quillController = QuillController(
-          document: Document.fromJson(jsonDecode(note['content'])),
           selection: TextSelection.collapsed(offset: 0),
         );
       } catch (e) {
@@ -83,33 +50,76 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     setState(() => _isLoading = false);
   }
 
-  // Save the note (insert or update)
-  Future<void> _saveNote() async {
+  // Create a new note if it's actually new
+  Future<void> _createNote() async {
     String title = _titleController.text.trim();
     String contentJson =
         jsonEncode(_quillController.document.toDelta().toJson());
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Title cannot be empty"),
-        backgroundColor: Colors.red,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Title cannot be empty"),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
-    if (widget.noteId == null) {
-      await DatabaseHelper().addNote(title, contentJson);
-    } else {
-      await DatabaseHelper().updateNote(widget.noteId!, title, contentJson);
-    }
+    if (!_isNewNote) return; // ✅ Prevent duplicate note creation
 
-    Navigator.pop(context, true);
+    int noteId = await DatabaseHelper().addNote(title, contentJson);
+    setState(() {
+      widget.noteId = noteId; // ✅ Update noteId after creating
+      _isNewNote = false; // ✅ Mark as existing note
+    });
+
+    widget.onSave();
   }
 
+  // Update an existing note
+  Future<void> _updateNote() async {
+    if (_isNewNote || widget.noteId == null)
+      return; // ✅ Avoid unnecessary updates
+
+    String title = _titleController.text.trim();
+    String contentJson =
+        jsonEncode(_quillController.document.toDelta().toJson());
+
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Title cannot be empty"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await DatabaseHelper().updateNote(widget.noteId!, title, contentJson);
+    widget.onSave();
+  }
+
+  // Save logic to decide between creating and updating
+  Future<void> _saveNote() async {
+    if (_isNewNote) {
+      await _createNote();
+    } else {
+      await _updateNote();
+    }
+  }
+
+  // Prevent duplicate note creation on back press
   Future<bool> _onBackPressed() async {
-    await _saveNote();
-    Navigator.pop(context);
-    return Future.value(false);
+    await _saveNote(); // ✅ Ensures update instead of re-creation
+    return Future.value(true); // ✅ Allow normal back navigation
+  }
+
+  void _toggleStarred() {
+    setState(() {
+      _isStarred = !_isStarred;
+    });
+    _saveNote();
   }
 
   void _lockNote() async {
@@ -135,7 +145,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         appBar: AppBar(
           iconTheme: IconThemeData(color: Colors.black),
           title: Text(
-            widget.note == null ? 'New Note' : 'Edit Note',
+            _isNewNote ? 'New Note' : 'Edit Note',
             style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
@@ -158,8 +168,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         ),
                         onPressed: () {
                           _toggleStarred();
-                          NavigationService.goBack;
-                        }, // Toggle star when clicked
+                          NavigationService.goBack();
+                        },
                       ),
                       SizedBox(width: 10),
                       Text("Starred"),
@@ -182,7 +192,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         context,
                         widget.note!['id'],
                         () {
-                          setState(() {}); // Refresh UI after locking
+                          setState(() {});
                         },
                       );
                     }
