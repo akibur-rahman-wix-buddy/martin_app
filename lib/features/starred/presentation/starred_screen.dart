@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
@@ -10,6 +13,7 @@ import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
 import '../../database/db_helper.dart';
 import '../../home/presentation/edit_notes/note_edit_screen.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class StarredNotesScreen extends StatefulWidget {
   @override
@@ -19,6 +23,7 @@ class StarredNotesScreen extends StatefulWidget {
 class _StarredNotesScreenState extends State<StarredNotesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  quill.QuillController _controller = quill.QuillController.basic();
   List<Map<String, dynamic>> _starredNotes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
   bool _isSelecting = false;
@@ -106,6 +111,17 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
     _isSelecting = false;
     _loadStarredNotes();
     setState(() {});
+  }
+
+  String extractPlainText(String deltaJson) {
+    try {
+      var document =
+          quill.Document.fromJson(jsonDecode(deltaJson) as List<dynamic>);
+      return document.toPlainText();
+    } catch (e) {
+      print("Error decoding delta JSON: $e");
+      return deltaJson;
+    }
   }
 
   @override
@@ -251,13 +267,18 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    note['content'] ?? 'No Content',
-                                    maxLines: 12,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontSize: 14.sp, color: Colors.black),
-                                  ),
+                                  note['content'] is String
+                                      ? Text(
+                                          extractPlainText(note['content']),
+                                          maxLines: 12,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.left,
+                                        )
+                                      : QuillEditor(
+                                          controller: _controller,
+                                          focusNode: FocusNode(),
+                                          scrollController: ScrollController(),
+                                        ),
                                 ],
                               ),
                             ),
