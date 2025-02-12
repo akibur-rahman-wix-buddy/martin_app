@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:martin_app/features/custom_drawer/presentation/custom_drawer.dart';
@@ -8,6 +11,7 @@ import '../../../gen/colors.gen.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../database/db_helper.dart';
 import 'widgets/show_permamently_delete_dialog.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
 
 class RecycleBinScreen extends StatefulWidget {
   @override
@@ -16,6 +20,7 @@ class RecycleBinScreen extends StatefulWidget {
 
 class _RecycleBinScreenState extends State<RecycleBinScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  quill.QuillController _controller = quill.QuillController.basic();
   List<Map<String, dynamic>> _recycleBinNotes = [];
   Set<int> _selectedNotes = Set<int>();
 
@@ -80,6 +85,17 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
   }
 
   bool _isSelecting = false;
+
+  String extractPlainText(String deltaJson) {
+    try {
+      var document =
+          quill.Document.fromJson(jsonDecode(deltaJson) as List<dynamic>);
+      return document.toPlainText();
+    } catch (e) {
+      print("Error decoding delta JSON: $e");
+      return deltaJson;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,12 +224,18 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                           Padding(
                             padding: EdgeInsets.all(12.sp),
                             child: Expanded(
-                              child: Text(
-                                note['content'] ?? 'No Content',
-                                maxLines: 10,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.justify,
-                              ),
+                              child: note['content'] is String
+                                  ? Text(
+                                      extractPlainText(note['content']),
+                                      maxLines: 12,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.left,
+                                    )
+                                  : QuillEditor(
+                                      controller: _controller,
+                                      focusNode: FocusNode(),
+                                      scrollController: ScrollController(),
+                                    ),
                             ),
                           ),
                           Spacer(),

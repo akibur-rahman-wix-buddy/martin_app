@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:martin_app/constants/text_font_style.dart';
 import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:martin_app/helpers/navigation_service.dart';
 import '../../../database/db_helper.dart';
 
+// ignore: must_be_immutable
 class NoteEditorScreen extends StatefulWidget {
   final Map<String, dynamic>? note;
   final VoidCallback onSave;
@@ -23,7 +25,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   bool _isLoading = true;
   bool _isStarred = false;
   bool _isLocked = false;
-  bool _isNewNote = true; // ✅ Track if it's a new note
+  bool _isNewNote = true;
 
   @override
   void initState() {
@@ -31,8 +33,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _quillController = QuillController.basic();
 
     if (widget.note != null) {
-      _isNewNote = false; // ✅ It's an existing note
-      widget.noteId = widget.note!['id']; // ✅ Ensure noteId is assigned
+      _isNewNote = false;
+      widget.noteId = widget.note!['id'];
       _titleController.text = widget.note!['title'];
       _isStarred = widget.note!['starred'] == 1;
       _isLocked = widget.note!['locked'] == 1;
@@ -50,7 +52,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     setState(() => _isLoading = false);
   }
 
-  // Create a new note if it's actually new
   Future<void> _createNote() async {
     String title = _titleController.text.trim();
     String contentJson =
@@ -66,21 +67,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       return;
     }
 
-    if (!_isNewNote) return; // ✅ Prevent duplicate note creation
+    if (!_isNewNote) return;
 
     int noteId = await DatabaseHelper().addNote(title, contentJson);
     setState(() {
-      widget.noteId = noteId; // ✅ Update noteId after creating
-      _isNewNote = false; // ✅ Mark as existing note
+      widget.noteId = noteId;
+      _isNewNote = false;
     });
 
     widget.onSave();
   }
 
-  // Update an existing note
   Future<void> _updateNote() async {
-    if (_isNewNote || widget.noteId == null)
-      return; // ✅ Avoid unnecessary updates
+    if (_isNewNote || widget.noteId == null) return;
 
     String title = _titleController.text.trim();
     String contentJson =
@@ -100,7 +99,6 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     widget.onSave();
   }
 
-  // Save logic to decide between creating and updating
   Future<void> _saveNote() async {
     if (_isNewNote) {
       await _createNote();
@@ -109,10 +107,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
   }
 
-  // Prevent duplicate note creation on back press
   Future<bool> _onBackPressed() async {
-    await _saveNote(); // ✅ Ensures update instead of re-creation
-    return Future.value(true); // ✅ Allow normal back navigation
+    await _saveNote();
+    return Future.value(true);
   }
 
   void _toggleStarred() {
@@ -149,8 +146,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
             style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
-            IconButton(icon: Icon(Icons.save), onPressed: _saveNote),
+            // IconButton(icon: Icon(Icons.save), onPressed: _saveNote),
             PopupMenuButton<String>(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16.r)),
               onSelected: (String value) {
                 if (value == "starred") {
                   _toggleStarred();
@@ -180,10 +179,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: "lock",
                   child: Row(
                     children: [
-                      Icon(_isLocked ? Icons.lock : Icons.lock_open,
-                          color: Colors.black),
-                      SizedBox(width: 10),
-                      Text(_isLocked ? "Unlock" : "Lock"),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w),
+                        child: Icon(Icons.lock, color: Colors.black),
+                      ),
+                      SizedBox(width: 10.w),
+                      Text("Lock"),
                     ],
                   ),
                   onTap: () {
@@ -213,9 +214,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         TextField(
                           controller: _titleController,
                           decoration: InputDecoration(
-                            hintText: 'Title',
-                            border: InputBorder.none,
-                          ),
+                              hintText: 'Title',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                  fontSize: 16.sp, color: Colors.grey)),
                         ),
                       ],
                     ),
@@ -223,9 +225,18 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   Expanded(
                     child: QuillEditor.basic(
                       controller: _quillController,
+                      configurations: QuillEditorConfigurations(
+                        placeholder: 'Write your note.....',
+                        customStyleBuilder: (attribute) =>
+                            TextStyle(fontSize: 16.sp),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      ),
                     ),
                   ),
-                  QuillToolbar.simple(controller: _quillController),
+                  QuillToolbar.simple(
+                      controller: _quillController,
+                      configurations: QuillSimpleToolbarConfigurations(
+                          multiRowsDisplay: false)),
                 ],
               ),
       ),
