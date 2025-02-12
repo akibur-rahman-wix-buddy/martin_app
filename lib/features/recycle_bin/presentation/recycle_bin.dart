@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:martin_app/features/custom_drawer/presentation/custom_drawer.dart';
+import 'package:notely/features/custom_drawer/presentation/custom_drawer.dart';
 
 import '../../../constants/text_font_style.dart';
 import '../../../gen/colors.gen.dart';
@@ -223,20 +223,18 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                         children: [
                           Padding(
                             padding: EdgeInsets.all(12.sp),
-                            child: Expanded(
-                              child: note['content'] is String
-                                  ? Text(
-                                      extractPlainText(note['content']),
-                                      maxLines: 12,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.left,
-                                    )
-                                  : QuillEditor(
-                                      controller: _controller,
-                                      focusNode: FocusNode(),
-                                      scrollController: ScrollController(),
-                                    ),
-                            ),
+                            child: note['content'] is String
+                                ? Text(
+                                    extractPlainText(note['content']),
+                                    maxLines: 11,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.left,
+                                  )
+                                : QuillEditor(
+                                    controller: _controller,
+                                    focusNode: FocusNode(),
+                                    scrollController: ScrollController(),
+                                  ),
                           ),
                           Spacer(),
                           // Text(

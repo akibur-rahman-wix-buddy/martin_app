@@ -1,7 +1,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:intl/intl.dart';
-// import 'package:martin_app/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
+// import 'package:notely/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
 // import '../../../constants/text_font_style.dart';
 // import '../../../gen/assets.gen.dart';
 // import '../../../gen/colors.gen.dart';
@@ -202,7 +202,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:martin_app/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
+import 'package:notely/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/assets.gen.dart';
 import '../../../gen/colors.gen.dart';

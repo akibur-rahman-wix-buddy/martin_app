@@ -1,4 +1,4 @@
-# martin_app
+# notely
 
 A new Flutter project.
 

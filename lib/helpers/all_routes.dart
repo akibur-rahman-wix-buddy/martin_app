@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:martin_app/features/home/presentation/home.dart';
-import 'package:martin_app/features/lock_notes/presentation/lock_notes.dart';
-import 'package:martin_app/features/recycle_bin/presentation/recycle_bin.dart';
-import 'package:martin_app/features/starred/presentation/starred_screen.dart';
+import 'package:notely/features/home/presentation/home.dart';
+import 'package:notely/features/lock_notes/presentation/lock_notes.dart';
+import 'package:notely/features/recycle_bin/presentation/recycle_bin.dart';
+import 'package:notely/features/starred/presentation/starred_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();

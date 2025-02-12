@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:martin_app/helpers/ui_helpers.dart';
+import 'package:notely/helpers/ui_helpers.dart';
 import '../../../database/db_helper.dart';
 
 void showUnlockDialog(BuildContext context, int noteId, String correctPassword,
