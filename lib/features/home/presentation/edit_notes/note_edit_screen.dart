@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:martin_app/constants/text_font_style.dart';
-import 'package:martin_app/features/lock_notes/presentation/widget/show_lock_dialog.dart';
-import 'package:martin_app/helpers/navigation_service.dart';
+import 'package:notely/constants/text_font_style.dart';
+import 'package:notely/features/lock_notes/presentation/widget/show_lock_dialog.dart';
+import 'package:notely/helpers/navigation_service.dart';
 import '../../../database/db_helper.dart';
 
 // ignore: must_be_immutable
@@ -27,6 +27,31 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   bool _isLocked = false;
   bool _isNewNote = true;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _quillController = QuillController.basic();
+
+  //   if (widget.note != null) {
+  //     _isNewNote = false;
+  //     widget.noteId = widget.note!['id'];
+  //     _titleController.text = widget.note!['title'];
+  //     _isStarred = widget.note!['starred'] == 1;
+  //     _isLocked = widget.note!['locked'] == 1;
+
+  //     try {
+  //       _quillController = QuillController(
+  //         document: Document.fromJson(jsonDecode(widget.note!['content'])),
+  //         selection: TextSelection.collapsed(offset: 0),
+  //       );
+  //     } catch (e) {
+  //       print("Error loading note: $e");
+  //     }
+  //   }
+
+  //   setState(() => _isLoading = false);
+  // }
+
   @override
   void initState() {
     super.initState();
@@ -40,8 +65,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       _isLocked = widget.note!['locked'] == 1;
 
       try {
+        String noteContent = widget.note!['content'];
+
+        // Ensure content is in JSON format
+        dynamic decodedContent;
+        try {
+          decodedContent = jsonDecode(noteContent);
+        } catch (e) {
+          // If decoding fails, assume it's plain text and convert
+          decodedContent = [
+            {"insert": "$noteContent\n"}
+          ];
+        }
+
         _quillController = QuillController(
-          document: Document.fromJson(jsonDecode(widget.note!['content'])),
+          document: Document.fromJson(decodedContent),
           selection: TextSelection.collapsed(offset: 0),
         );
       } catch (e) {

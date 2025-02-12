@@ -1,6 +1,6 @@
 {
-    "name": "martin_app",
-    "short_name": "martin_app",
+    "name": "notely",
+    "short_name": "notely",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

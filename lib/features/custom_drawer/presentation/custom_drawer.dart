@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:martin_app/features/database/db_helper.dart';
+import 'package:notely/features/database/db_helper.dart';
 import '../../../gen/colors.gen.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/navigation_service.dart';
@@ -69,10 +70,18 @@ class _CustomDrawerState extends State<CustomDrawer> {
       for (PlatformFile file in result.files) {
         File txtFile = File(file.path!);
         String content = await txtFile.readAsString();
+
+        // Convert plain text to Quill JSON format
+        String contentJson = jsonEncode([
+          {"insert": "$content\n"}
+        ]);
+
+        print("Converted Content JSON: $contentJson");
+
         String fileName = file.name;
 
         if (content.isNotEmpty) {
-          await _dbHelper.addNote(fileName, content);
+          await _dbHelper.addNote(fileName, contentJson);
           _uploadedFiles.add(fileName);
         }
       }
@@ -91,6 +100,48 @@ class _CustomDrawerState extends State<CustomDrawer> {
       );
     }
   }
+
+// Function to format the extracted plain text
+  String _formatExtractedText(String text) {
+    return text
+        .replaceAll(RegExp(r'\s+'), ' ') // Normalize whitespace
+        .replaceAll(RegExp(r'\n\s*\n'), '\n\n') // Keep paragraph spacing
+        .trim(); // Remove extra spaces
+  }
+
+  // Future<void> _pickAndUploadTxtFiles() async {
+  //   FilePickerResult? result = await FilePicker.platform.pickFiles(
+  //     type: FileType.custom,
+  //     allowedExtensions: ['txt'],
+  //     allowMultiple: true,
+  //   );
+
+  //   if (result != null) {
+  //     for (PlatformFile file in result.files) {
+  //       File txtFile = File(file.path!);
+  //       String content = await txtFile.readAsString();
+  //       String fileName = file.name;
+
+  //       if (content.isNotEmpty) {
+  //         await _dbHelper.addNote(fileName, content);
+  //         _uploadedFiles.add(fileName);
+  //       }
+  //     }
+
+  //     _loadNotes();
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //           content:
+  //               Text('${result.files.length} file(s) uploaded successfully!')),
+  //     );
+  //     NavigationService.navigateTo(Routes.homeScreen);
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('No file selected!')),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

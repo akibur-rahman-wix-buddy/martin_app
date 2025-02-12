@@ -66,7 +66,7 @@ class NotesCarousel extends StatelessWidget {
                           note['content'] is String
                               ? Text(
                                   extractPlainText(note['content']),
-                                  maxLines: 12,
+                                  maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
                                   textAlign: TextAlign.left,
                                 )
