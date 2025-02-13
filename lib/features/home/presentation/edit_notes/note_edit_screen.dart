@@ -290,6 +290,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   bool _isNewNote = true;
   String content = '';
   String title = '';
+
   @override
   void initState() {
     super.initState();
@@ -343,13 +344,17 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     }
 
     if (_isNewNote) {
-      int noteId = await DatabaseHelper().addNote(title, contentJson);
+      int noteId = await DatabaseHelper().addNote(
+        title,
+        contentJson,
+      );
       setState(() {
         widget.noteId = noteId;
         _isNewNote = false;
       });
     } else {
-      await DatabaseHelper().updateNote(widget.noteId!, title, contentJson);
+      await DatabaseHelper()
+          .updateNote(widget.noteId!, title, contentJson, starred: _isStarred);
     }
 
     widget.onSave();
@@ -373,7 +378,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _toggleStarred() {
-    setState(() => _isStarred = !_isStarred);
+    setState(() {
+      _isStarred = !_isStarred;
+    });
     _saveNote();
   }
 

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -197,7 +199,7 @@ class DatabaseHelper {
     final db = await database;
     await db.update(
       'notes',
-      {'starred': isFavourite ? 1 : 0},
+      {'starred': 1},
       where: 'id = ?',
       whereArgs: [noteId],
     );
