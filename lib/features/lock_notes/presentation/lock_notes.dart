@@ -293,6 +293,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
               child: Icon(
                 _isSearching ? Icons.close : Icons.search,
                 color: Colors.black,
+                size: 28.sp,
               ),
             ),
           ),

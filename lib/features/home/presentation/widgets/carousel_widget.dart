@@ -52,8 +52,10 @@ class NotesCarousel extends StatelessWidget {
                   items: previousNotes.map((note) {
                     return Container(
                       width: double.infinity,
+
                       margin: EdgeInsets.symmetric(horizontal: 8.w),
-                      padding: EdgeInsets.all(10.sp),
+                      // padding: EdgeInsets.all(10.sp),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
                       decoration: BoxDecoration(
                         color: AppColors.cEFF0F3,
                         borderRadius: BorderRadius.circular(22.r),
@@ -68,7 +70,7 @@ class NotesCarousel extends StatelessWidget {
                                   extractPlainText(note['content']),
                                   maxLines: 5,
                                   overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.left,
+                                  textAlign: TextAlign.center,
                                 )
                               : QuillEditor(
                                   controller: _controller,

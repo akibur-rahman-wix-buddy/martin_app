@@ -121,6 +121,7 @@ Future<void> setInitValue() async {
   appData.writeIfNull(kKeyfirstTime, true);
   await appData.writeIfNull(kKeyIsLoggedIn, false);
   await appData.writeIfNull(kKeyIsExploring, false);
+  await appData.writeIfNull(kEditCount, "");
   // this is a temporary token. which should be removed
 
   // DioSingleton.instance.update(

@@ -298,7 +298,8 @@ class DatabaseHelper {
             deletedAt TEXT,
             starred INTEGER DEFAULT 0,
             isLocked INTEGER DEFAULT 0,
-            password TEXT
+            password TEXT,
+          
           )
         ''');
 
@@ -518,5 +519,27 @@ class DatabaseHelper {
   Future<void> checkDatabase() async {
     bool exists = await tableExists('recent_searches');
     print('Recent Searches Table Exists: $exists');
+  }
+
+  Future<int> getTotalNotesCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM notes');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // Future<int> getEditedNotesCount() async {
+  //   final db = await database;
+  //   final result = await db
+  //       .rawQuery('SELECT COUNT(*) as count FROM notes WHERE is_edited = 1');
+  //   return Sqflite.firstIntValue(result) ?? 0;
+  // }
+
+  Future<int> getEditedNotesCount() async {
+    final db = await database;
+    List<Map<String, dynamic>> editedNotes = await db.rawQuery('''
+    SELECT COUNT(*) as count FROM notes 
+    WHERE content != initial_content -- Only count if content changed
+    ''');
+    return Sqflite.firstIntValue(editedNotes) ?? 0;
   }
 }
