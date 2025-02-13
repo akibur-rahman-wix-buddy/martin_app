@@ -257,7 +257,7 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Data Not Found',
+                    "Empty Data",
                     style: TextFontStyle.textStylec17cA1ABCCInter700,
                   ),
                   NotFoundWidget(),

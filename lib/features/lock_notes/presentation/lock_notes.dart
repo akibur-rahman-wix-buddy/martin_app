@@ -307,7 +307,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Data Not Found',
+                  "Empty Data",
                   style: TextFontStyle.textStylec17cA1ABCCInter700,
                 ),
                 NotFoundWidget(),

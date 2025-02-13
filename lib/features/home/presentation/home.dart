@@ -202,10 +202,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadNoteCounts() async {
     int total = await DatabaseHelper().getTotalNotesCount();
-    int edited = await DatabaseHelper().getEditedNotesCount();
+    // int edited = await DatabaseHelper().getEditedNotesCount();
     setState(() {
       _totalNotes = total;
-      _editedNotes = edited;
+      // _editedNotes = edited;
     });
   }
 
@@ -271,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Data Not Found',
+                    "Empty Data",
                     style: TextFontStyle.textStylec17cA1ABCCInter700,
                   ),
                   NotFoundWidget(),
