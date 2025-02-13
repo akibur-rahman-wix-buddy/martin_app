@@ -289,6 +289,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   bool _isLocked = false;
   bool _isNewNote = true;
   String content = '';
+  String title = '';
   @override
   void initState() {
     super.initState();
@@ -303,7 +304,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       _titleController.text = widget.note!['title'];
       _isStarred = widget.note!['starred'] == 1;
       _isLocked = widget.note!['locked'] == 1;
-
+      title = widget.note!['title'];
       try {
         String noteContent = widget.note!['content'];
         dynamic decodedContent;
@@ -362,7 +363,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   Future<bool> _onBackPressed() async {
-    if (content != _quillController.document.toPlainText()) {
+    if (content != _quillController.document.toPlainText() ||
+        title != _titleController.text) {
       appData.write(
           kEditCount, '${_titleController.text} ${getFormattedDate()}');
     }
