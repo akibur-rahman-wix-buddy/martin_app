@@ -77,6 +77,7 @@ const String kKeyMessage = 'message';
 const String kKeyData = 'data';
 const String kKeyCode = 'code';
 const String kKeyIsLoggedIn = 'is_logged_in';
+const String kEditCount = 'edit_count';
 const String kKeyAccessToken = 'access_token';
 const String kPhone = 'phone_number';
 const String kKeySelectedLocation = 'selected_location';

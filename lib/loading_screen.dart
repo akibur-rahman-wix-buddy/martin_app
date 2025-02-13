@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notely/welcome_screen.dart';
 import 'constants/app_constants.dart';
 import 'features/home/presentation/home.dart';
 import 'helpers/di.dart';
@@ -31,6 +32,7 @@ class _LoadingState extends State<Loading> {
     if (appData.read(kKeyIsLoggedIn)) {
       String token = appData.read(kKeyAccessToken);
       DioSingleton.instance.update(token);
+
       performPostLoginActions();
     } else {
       //  NotificationService().cancelAllNotifications();
@@ -43,13 +45,13 @@ class _LoadingState extends State<Loading> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return HomeScreen();
+      return WelcomeScreen();
     } else {
       return appData.read(kKeyIsLoggedIn)
           ? HomeScreen()
           : appData.read(kKeyfirstTime)
               ? HomeScreen()
-              : HomeScreen();
+              : WelcomeScreen();
     }
   }
 }

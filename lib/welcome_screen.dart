@@ -20,14 +20,6 @@ final class WelcomeScreen extends StatelessWidget {
               SizedBox(
                 height: 40.h,
               ),
-              Image.asset(
-                Assets.images.placeholderImage.path,
-                height: 100.h,
-                width: 100.w,
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
               SizedBox(
                 child: shimmer(
                     context: context,
