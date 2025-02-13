@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:notely/features/custom_drawer/presentation/custom_drawer.dart';
 
+import '../../../common_widgets/not_found_widget.dart';
 import '../../../constants/text_font_style.dart';
 import '../../../gen/colors.gen.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -29,13 +30,6 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
     super.initState();
     _fetchRecycleBinNotes();
   }
-
-  // void _fetchRecycleBinNotes() async {
-  //   final notes = await DatabaseHelper().getRecycleBinNotes();
-  //   setState(() {
-  //     _recycleBinNotes = notes;
-  //   });
-  // }
 
   void _fetchRecycleBinNotes() async {
     await DatabaseHelper().deleteOldNotes(); // Auto-delete expired notes
@@ -167,189 +161,178 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
         ],
       ),
       drawer: CustomDrawer(),
-      body: GridView.builder(
-        padding: EdgeInsets.all(12.sp),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 30.w,
-          childAspectRatio: 0.5,
-        ),
-        itemCount: _recycleBinNotes.length,
-        itemBuilder: (context, index) {
-          final note = _recycleBinNotes[index];
-          final isSelected = _selectedNotes.contains(note['id']);
-          DateTime? deletedAt = note['deletedAt'] != null
-              ? DateTime.parse(note['deletedAt'])
-              : null;
-
-          // int daysSinceDeleted = deletedAt != null
-          //     ? DateTime.now().difference(deletedAt).inDays
-          //     : 0;
-          DateTime today = DateUtils.dateOnly(DateTime.now());
-          DateTime deletedDate =
-              DateUtils.dateOnly(deletedAt ?? DateTime.now());
-
-          int daysSinceDeleted = today.difference(deletedDate).inDays;
-
-          // int daysRemaining = 30 - daysSinceDeleted;
-          return GestureDetector(
-            onLongPress: () {
-              setState(() {
-                _isSelecting = true;
-              });
-              _toggleNoteSelection(note['id']);
-            },
-            onTap: () {
-              if (_selectedNotes.isNotEmpty) {
-                _toggleNoteSelection(note['id']);
-              }
-            },
-            child: Column(
+      body: _recycleBinNotes.isEmpty
+          ? Center(
+              child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Stack(
-                  children: [
-                    AnimatedContainer(
-                      height: 250.h,
-                      width: double.infinity,
-                      duration: Duration(milliseconds: 200),
-                      margin: EdgeInsets.all(4.sp),
-                      // padding: EdgeInsets.all(12.sp),
-                      decoration: BoxDecoration(
-                        color: AppColors.cFFFFFF,
-                        borderRadius: BorderRadius.circular(22.r),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(12.sp),
-                            child: note['content'] is String
-                                ? Text(
-                                    extractPlainText(note['content']),
-                                    maxLines: 11,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.left,
-                                  )
-                                : QuillEditor(
-                                    controller: _controller,
-                                    focusNode: FocusNode(),
-                                    scrollController: ScrollController(),
-                                  ),
-                          ),
-                          Spacer(),
-                          // Text(
-                          //   createdAt != null
-                          //       ? DateFormat('MMM dd, yyyy h:mm a').format(createdAt)
-                          //       : 'No Date',
-                          //   style: TextStyle(fontSize: 12, color: Colors.grey),
-                          // ),
-
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Text(
-                                  deletedAt != null
-                                      ? DateFormat('h:mm a').format(deletedAt)
-                                      : 'No Date',
-                                  style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-
-                              // Text(
-                              //   daysRemaining > 0
-                              //       ? '$daysRemaining days left'
-                              //       : 'Deleting soon!',
-                              //   style: TextStyle(
-                              //     fontSize: 12,
-                              //     color: daysRemaining > 0
-                              //         ? Colors.orange
-                              //         : Colors.red,
-                              //     fontWeight: FontWeight.bold,
-                              //   ),
-                              // ),
-                            ],
-                          ),
-                          Container(
-                            height: 30.h,
-                            width: double.infinity,
-                            alignment: Alignment.bottomCenter,
-                            padding: EdgeInsets.all(6.sp),
-                            decoration: BoxDecoration(
-                                color: AppColors.cBFBBBB,
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(12.r),
-                                  bottomRight: Radius.circular(12.r),
-                                )),
-                            child: Text(
-                              daysSinceDeleted == 0
-                                  ? 'Deleted today'
-                                  : ' $daysSinceDeleted days',
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    if (_isSelecting)
-                      Positioned(
-                        top: 8.sp,
-                        right: 8.sp,
-                        child: Container(
-                          height: 25.h,
-                          width: 25.w,
-                          padding: EdgeInsets.zero,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: isSelected ? Colors.red : Colors.grey,
-                              width: 2,
-                            ),
-                          ),
-                          child: Transform.scale(
-                            scale: 1.2,
-                            child: Checkbox(
-                              value: isSelected,
-                              onChanged: (bool? value) {
-                                _toggleNoteSelection(note['id']);
-                              },
-                              activeColor: Colors.red,
-                              checkColor: Colors.white,
-                              shape: CircleBorder(),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
                 Text(
-                  note['title'] ?? 'No title',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  'Data Not Found',
                   style: TextFontStyle.textStylec17cA1ABCCInter700,
                 ),
-                UIHelper.verticalSpace(4.h),
-                Text(
-                  deletedAt != null
-                      ? DateFormat('dd MMM').format(deletedAt)
-                      : 'No Date',
-                  style: TextFontStyle.textStylec17cA1ABCCInter700
-                      .copyWith(fontSize: 12.sp),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
+                NotFoundWidget(),
               ],
+            ))
+          : GridView.builder(
+              padding: EdgeInsets.all(12.sp),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 30.w,
+                childAspectRatio: 0.5,
+              ),
+              itemCount: _recycleBinNotes.length,
+              itemBuilder: (context, index) {
+                final note = _recycleBinNotes[index];
+                final isSelected = _selectedNotes.contains(note['id']);
+                DateTime? deletedAt = note['deletedAt'] != null
+                    ? DateTime.parse(note['deletedAt'])
+                    : null;
+
+                DateTime today = DateUtils.dateOnly(DateTime.now());
+                DateTime deletedDate =
+                    DateUtils.dateOnly(deletedAt ?? DateTime.now());
+
+                int daysSinceDeleted = today.difference(deletedDate).inDays;
+
+                return GestureDetector(
+                  onLongPress: () {
+                    setState(() {
+                      _isSelecting = true;
+                    });
+                    _toggleNoteSelection(note['id']);
+                  },
+                  onTap: () {
+                    if (_selectedNotes.isNotEmpty) {
+                      _toggleNoteSelection(note['id']);
+                    }
+                  },
+                  child: Column(
+                    children: [
+                      Stack(
+                        children: [
+                          AnimatedContainer(
+                            height: 250.h,
+                            width: double.infinity,
+                            duration: Duration(milliseconds: 200),
+                            margin: EdgeInsets.all(4.sp),
+                            decoration: BoxDecoration(
+                              color: AppColors.cFFFFFF,
+                              borderRadius: BorderRadius.circular(22.r),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(12.sp),
+                                  child: note['content'] is String
+                                      ? Text(
+                                          extractPlainText(note['content']),
+                                          maxLines: 11,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.left,
+                                        )
+                                      : QuillEditor(
+                                          controller: _controller,
+                                          focusNode: FocusNode(),
+                                          scrollController: ScrollController(),
+                                        ),
+                                ),
+                                Spacer(),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Center(
+                                      child: Text(
+                                        deletedAt != null
+                                            ? DateFormat('h:mm a')
+                                                .format(deletedAt)
+                                            : 'No Date',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                  ],
+                                ),
+                                Container(
+                                  height: 30.h,
+                                  width: double.infinity,
+                                  alignment: Alignment.bottomCenter,
+                                  padding: EdgeInsets.all(6.sp),
+                                  decoration: BoxDecoration(
+                                      color: AppColors.cBFBBBB,
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(12.r),
+                                        bottomRight: Radius.circular(12.r),
+                                      )),
+                                  child: Text(
+                                    daysSinceDeleted == 0
+                                        ? 'Deleted today'
+                                        : ' $daysSinceDeleted days',
+                                    style: TextStyle(
+                                        fontSize: 12, color: Colors.white),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                          if (_isSelecting)
+                            Positioned(
+                              top: 8.sp,
+                              right: 8.sp,
+                              child: Container(
+                                height: 25.h,
+                                width: 25.w,
+                                padding: EdgeInsets.zero,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        isSelected ? Colors.red : Colors.grey,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Transform.scale(
+                                  scale: 1.2,
+                                  child: Checkbox(
+                                    value: isSelected,
+                                    onChanged: (bool? value) {
+                                      _toggleNoteSelection(note['id']);
+                                    },
+                                    activeColor: Colors.red,
+                                    checkColor: Colors.white,
+                                    shape: CircleBorder(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                      Text(
+                        note['title'] ?? 'No title',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextFontStyle.textStylec17cA1ABCCInter700,
+                      ),
+                      UIHelper.verticalSpace(4.h),
+                      Text(
+                        deletedAt != null
+                            ? DateFormat('dd MMM').format(deletedAt)
+                            : 'No Date',
+                        style: TextFontStyle.textStylec17cA1ABCCInter700
+                            .copyWith(fontSize: 12.sp),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

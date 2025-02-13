@@ -73,6 +73,19 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
     });
   }
 
+  void _deleteSelectedNotes() async {
+    for (var id in _selectedNoteIds) {
+      await DatabaseHelper().moveToRecycleBin(id);
+    }
+    setState(() {
+      _selectedNoteIds.clear();
+      if (_selectedNoteIds.isEmpty) {
+        _isSelecting = false;
+      }
+    });
+    _loadStarredNotes();
+  }
+
   String _formatDate(String? dateString) {
     if (dateString == null) return 'No Date';
 
@@ -178,6 +191,14 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                   ],
                 ),
           actions: [
+            _isSelecting
+                ? IconButton(
+                    onPressed: _deleteSelectedNotes,
+                    icon: Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ))
+                : SizedBox.shrink(),
             if (!_isSelecting)
               InkWell(
                 onTap: () {
@@ -187,7 +208,7 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                 },
                 child: Padding(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Image.asset(
                     Assets.icons.searchIcon.path,
                     color: Colors.black,
@@ -201,6 +222,32 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                   _unfavoriteSelectedNotes();
                 },
               ),
+            PopupMenuButton<String>(
+              iconColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              onSelected: (String value) async {
+                if (value == "edit_preview") {
+                  setState(() {
+                    _isSelecting = true;
+                    _selectedNoteIds.clear();
+                  });
+                } else if (value == "pin_unfavourite") {
+                  await _unfavoriteSelectedNotes();
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                PopupMenuItem(
+                  value: "edit_preview",
+                  child: Text("Edit"),
+                ),
+                PopupMenuItem(
+                  value: "pin_unfavourite",
+                  child: Text("Unfavourite"),
+                ),
+              ],
+            ),
           ],
         ),
         drawer: CustomDrawer(),

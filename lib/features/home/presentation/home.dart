@@ -92,13 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadNoteCounts();
   }
 
-  Future<void> _loadRecentSearches() async {
-    List<String> searches = await DatabaseHelper().getRecentSearches();
-    setState(() {
-      _recentSearches = searches;
-    });
-  }
-
   void _deleteSelectedNotes() async {
     for (var id in _selectedNotes) {
       await DatabaseHelper().moveToRecycleBin(id);
@@ -189,13 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
         final content = note['title']?.toLowerCase() ?? '';
         return content.contains(query.toLowerCase());
       }).toList();
-    });
-  }
-
-  void _clearSearchHistory() async {
-    await DatabaseHelper().clearRecentSearches();
-    setState(() {
-      // Update your UI if necessary
     });
   }
 
@@ -412,14 +398,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                           focusNode: FocusNode(),
                                           scrollController: ScrollController(),
                                         ),
-                                  // Text(
-                                  //   note['content'] ?? 'No Content',
-                                  //   maxLines: 12,
-                                  //   overflow: TextOverflow.ellipsis,
-                                  //   textAlign: TextAlign.left,
-                                  //   style: TextStyle(
-                                  //       fontSize: 14.sp, color: Colors.black),
-                                  // ),
                                 ],
                               ),
                             ),
@@ -500,7 +478,6 @@ class _HomeScreenState extends State<HomeScreen> {
       iconTheme: IconThemeData(
         color: Colors.black,
       ),
-
       title: _isSearching
           ? TextField(
               controller: _searchController,
@@ -514,27 +491,11 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: Colors.black),
             )
           : Text(
-              'All Notes (${_filteredNotes.length})',
+              _selectedNotes.isEmpty
+                  ? 'All Notes (${_filteredNotes.length})'
+                  : '${_selectedNotes.length} Selected',
               style: TextFontStyle.textStylec17cA1ABCCInter700,
             ),
-
-      // title: _isSearching
-      //     ? TextField(
-      //         autofocus: true,
-      //         onChanged: _onSearchQueryChanged,
-      //         decoration: InputDecoration(
-      //           hintText: 'Search Notes...',
-      //           hintStyle: TextStyle(color: Colors.black),
-      //           border: InputBorder.none,
-      //         ),
-      //         style: TextStyle(color: Colors.black),
-      //       )
-      //     : Text(
-      //         _selectedNotes.isEmpty
-      //             ? 'All Notes (${_filteredNotes.length})'
-      //             : '${_selectedNotes.length} Selected',
-      //         style: TextFontStyle.textStylec17cA1ABCCInter700,
-      //       ),
       actions: [
         if (_selectedNotes.isNotEmpty) ...[
           IconButton(
@@ -554,7 +515,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         // if (!_isSelecting)
         IconButton(
-          icon: Icon(_isSearching ? Icons.close : Icons.search),
+          icon: Icon(
+            _isSearching ? Icons.close : Icons.search,
+            size: 22.sp,
+          ),
           onPressed: () {
             setState(() {
               _isSearching = !_isSearching;

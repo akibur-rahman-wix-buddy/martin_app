@@ -29,6 +29,10 @@ class $AssetsIconsGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  /// File path: assets/images/app_logo.png
+  AssetGenImage get appLogo =>
+      const AssetGenImage('assets/images/app_logo.png');
+
   /// File path: assets/images/error_image.png
   AssetGenImage get errorImage =>
       const AssetGenImage('assets/images/error_image.png');
@@ -38,7 +42,7 @@ class $AssetsImagesGen {
       const AssetGenImage('assets/images/placeholder_image.jpeg');
 
   /// List of all assets
-  List<AssetGenImage> get values => [errorImage, placeholderImage];
+  List<AssetGenImage> get values => [appLogo, errorImage, placeholderImage];
 }
 
 class $AssetsLottieGen {
