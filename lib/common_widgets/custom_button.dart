@@ -18,7 +18,8 @@ Widget customeButton({
     height: height,
     minWidth: minWidth,
     shape: RoundedRectangleBorder(
-      side: BorderSide(color: borderColor ?? AppColors.allPrimaryColor, width: 1.5.sp),
+      side: BorderSide(
+          color: borderColor ?? AppColors.allPrimaryColor, width: 1.5.sp),
       borderRadius: BorderRadius.circular(borderRadius),
     ),
     color: color,
