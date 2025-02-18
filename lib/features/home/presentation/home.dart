@@ -524,23 +524,23 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: _deleteSelectedNotes,
           ),
         ],
-        // if (!_isSelecting)
-        IconButton(
-          icon: Icon(
-            _isSearching ? Icons.close : Icons.search,
-            size: 22.sp,
+        if (!_isSelecting)
+          IconButton(
+            icon: Icon(
+              _isSearching ? Icons.close : Icons.search,
+              size: 22.sp,
+            ),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _searchQuery = '';
+                  _filteredNotes = _filteredNotes; // Reset filtered notes
+                }
+              });
+            },
           ),
-          onPressed: () {
-            setState(() {
-              _isSearching = !_isSearching;
-              if (!_isSearching) {
-                _searchController.clear();
-                _searchQuery = '';
-                _filteredNotes = _filteredNotes; // Reset filtered notes
-              }
-            });
-          },
-        ),
         PopupMenuButton<String>(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
