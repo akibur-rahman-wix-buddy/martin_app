@@ -1,3 +1,5 @@
+// // ignore_for_file: deprecated_member_use
+
 // import 'dart:convert';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_quill/flutter_quill.dart';
@@ -5,13 +7,14 @@
 // import 'package:notely/constants/text_font_style.dart';
 // import 'package:notely/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 // import 'package:notely/helpers/navigation_service.dart';
+// import '../../../../constants/app_constants.dart';
+// import '../../../../helpers/di.dart';
 // import '../../../database/db_helper.dart';
 
-// // ignore: must_be_immutable
 // class NoteEditorScreen extends StatefulWidget {
 //   final Map<String, dynamic>? note;
 //   final VoidCallback onSave;
-//   int? noteId; // Must be mutable for dynamic updates
+//   int? noteId;
 
 //   NoteEditorScreen({this.note, required this.onSave, this.noteId});
 
@@ -26,28 +29,30 @@
 //   bool _isStarred = false;
 //   bool _isLocked = false;
 //   bool _isNewNote = true;
+//   String content = '';
+//   String title = '';
 
 //   @override
 //   void initState() {
 //     super.initState();
 //     _quillController = QuillController.basic();
+//     _loadNote();
+//   }
 
+//   void _loadNote() {
 //     if (widget.note != null) {
 //       _isNewNote = false;
 //       widget.noteId = widget.note!['id'];
 //       _titleController.text = widget.note!['title'];
 //       _isStarred = widget.note!['starred'] == 1;
 //       _isLocked = widget.note!['locked'] == 1;
-
+//       title = widget.note!['title'];
 //       try {
 //         String noteContent = widget.note!['content'];
-
-//         // Ensure content is in JSON format
 //         dynamic decodedContent;
 //         try {
 //           decodedContent = jsonDecode(noteContent);
 //         } catch (e) {
-//           // If decoding fails, assume it's plain text and convert
 //           decodedContent = [
 //             {"insert": "$noteContent\n"}
 //           ];
@@ -57,70 +62,49 @@
 //           document: Document.fromJson(decodedContent),
 //           selection: TextSelection.collapsed(offset: 0),
 //         );
+//         content = _quillController.document.toPlainText();
 //       } catch (e) {
 //         print("Error loading note: $e");
 //       }
 //     }
-
 //     setState(() => _isLoading = false);
 //   }
 
-//   Future<void> _createNote() async {
-//     String title = _titleController.text.trim();
-//     String contentJson =
-//         jsonEncode(_quillController.document.toDelta().toJson());
-
-//     if (title.isEmpty) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(
-//           content: Text("Title cannot be empty"),
-//           backgroundColor: Colors.red,
-//         ),
-//       );
-//       return;
-//     }
-
-//     if (!_isNewNote) return;
-
-//     int noteId = await DatabaseHelper().addNote(title, contentJson);
-//     setState(() {
-//       widget.noteId = noteId;
-//       _isNewNote = false;
-//     });
-
-//     widget.onSave();
-//   }
-
-//   Future<void> _updateNote() async {
-//     if (_isNewNote || widget.noteId == null) return;
-
-//     String title = _titleController.text.trim();
-//     String contentJson =
-//         jsonEncode(_quillController.document.toDelta().toJson());
-
-//     if (title.isEmpty) {
-//       ScaffoldMessenger.of(context).showSnackBar(
-//         SnackBar(
-//           content: Text("Title cannot be empty"),
-//           backgroundColor: Colors.red,
-//         ),
-//       );
-//       return;
-//     }
-
-//     await DatabaseHelper().updateNote(widget.noteId!, title, contentJson);
-//     widget.onSave();
-//   }
-
 //   Future<void> _saveNote() async {
+//     String title = _titleController.text.trim();
+//     String contentJson =
+//         jsonEncode(_quillController.document.toDelta().toJson());
+
 //     if (_isNewNote) {
-//       await _createNote();
+//       int noteId = await DatabaseHelper().addNote(
+//         title,
+//         contentJson,
+//       );
+//       setState(() {
+//         widget.noteId = noteId;
+//         _isNewNote = false;
+//       });
 //     } else {
-//       await _updateNote();
+//       await DatabaseHelper()
+//           .updateNote(widget.noteId!, title, contentJson, starred: _isStarred);
 //     }
+
+//     widget.onSave();
+//   }
+
+//   String getFormattedDate() {
+//     DateTime now = DateTime.now();
+//     String month = now.month.toString().padLeft(2, '0');
+//     String day = now.day.toString().padLeft(2, '0');
+//     return '$month/$day';
 //   }
 
 //   Future<bool> _onBackPressed() async {
+//     if (content != _quillController.document.toPlainText() ||
+//         title != _titleController.text) {
+//       appData.write(
+//           kEditCount, '${_titleController.text} ${getFormattedDate()}');
+//     }
 //     await _saveNote();
 //     return Future.value(true);
 //   }
@@ -132,17 +116,12 @@
 //     _saveNote();
 //   }
 
-//   void _lockNote() async {
+//   void _lockNote() {
 //     if (widget.note != null) {
 //       showLockNotesDialog(
 //         context,
 //         widget.note!['id'],
-//         () {
-//           setState(() {
-//             _isLocked = true;
-//           });
-//           widget.onSave();
-//         },
+//         () => setState(() => _isLocked = true),
 //       );
 //     }
 //   }
@@ -159,7 +138,6 @@
 //             style: TextFontStyle.textStylec17c000000Poppins400,
 //           ),
 //           actions: [
-//             // IconButton(icon: Icon(Icons.save), onPressed: _saveNote),
 //             PopupMenuButton<String>(
 //               shape: RoundedRectangleBorder(
 //                   borderRadius: BorderRadius.circular(16.r)),
@@ -173,16 +151,8 @@
 //                   value: "starred",
 //                   child: Row(
 //                     children: [
-//                       IconButton(
-//                         icon: Icon(
-//                           _isStarred ? Icons.star : Icons.star_border,
-//                           color: _isStarred ? Colors.amber : Colors.black,
-//                         ),
-//                         onPressed: () {
-//                           _toggleStarred();
-//                           NavigationService.goBack();
-//                         },
-//                       ),
+//                       Icon(_isStarred ? Icons.star : Icons.star_border,
+//                           color: _isStarred ? Colors.amber : Colors.black),
 //                       SizedBox(width: 10),
 //                       Text("Starred"),
 //                     ],
@@ -192,25 +162,12 @@
 //                   value: "lock",
 //                   child: Row(
 //                     children: [
-//                       Padding(
-//                         padding: EdgeInsets.symmetric(horizontal: 10.w),
-//                         child: Icon(Icons.lock, color: Colors.black),
-//                       ),
+//                       Icon(Icons.lock, color: Colors.black),
 //                       SizedBox(width: 10.w),
 //                       Text("Lock"),
 //                     ],
 //                   ),
-//                   onTap: () {
-//                     if (widget.note != null) {
-//                       showLockNotesDialog(
-//                         context,
-//                         widget.note!['id'],
-//                         () {
-//                           setState(() {});
-//                         },
-//                       );
-//                     }
-//                   },
+//                   onTap: _lockNote,
 //                 ),
 //               ],
 //             ),
@@ -222,17 +179,14 @@
 //                 children: [
 //                   Padding(
 //                     padding: const EdgeInsets.all(16.0),
-//                     child: Column(
-//                       children: [
-//                         TextField(
-//                           controller: _titleController,
-//                           decoration: InputDecoration(
-//                               hintText: 'Title',
-//                               border: InputBorder.none,
-//                               hintStyle: TextStyle(
-//                                   fontSize: 16.sp, color: Colors.grey)),
-//                         ),
-//                       ],
+//                     child: TextField(
+//                       controller: _titleController,
+//                       decoration: InputDecoration(
+//                         hintText: 'Title',
+//                         border: InputBorder.none,
+//                         hintStyle:
+//                             TextStyle(fontSize: 16.sp, color: Colors.grey),
+//                       ),
 //                     ),
 //                   ),
 //                   Expanded(
@@ -247,17 +201,16 @@
 //                     ),
 //                   ),
 //                   QuillToolbar.simple(
-//                       controller: _quillController,
-//                       configurations: QuillSimpleToolbarConfigurations(
-//                           multiRowsDisplay: false)),
+//                     controller: _quillController,
+//                     configurations: QuillSimpleToolbarConfigurations(
+//                         multiRowsDisplay: false),
+//                   ),
 //                 ],
 //               ),
 //       ),
 //     );
 //   }
 // }
-
-// ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -334,18 +287,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     String contentJson =
         jsonEncode(_quillController.document.toDelta().toJson());
 
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text("Title cannot be empty"),
-            backgroundColor: Colors.red),
-      );
-      return;
-    }
-
     if (_isNewNote) {
       int noteId = await DatabaseHelper().addNote(
-        title,
+        title.isNotEmpty ? title : ' ',
         contentJson,
       );
       setState(() {
@@ -450,7 +394,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     child: TextField(
                       controller: _titleController,
                       decoration: InputDecoration(
-                        hintText: 'Title',
+                        hintText:
+                            'Title (optional)', // Indicate that title is optional
                         border: InputBorder.none,
                         hintStyle:
                             TextStyle(fontSize: 16.sp, color: Colors.grey),
