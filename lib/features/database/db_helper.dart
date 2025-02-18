@@ -62,7 +62,10 @@ class DatabaseHelper {
 
   Future<List<Map<String, dynamic>>> getNotes() async {
     final db = await database;
-    return db.query('notes', orderBy: 'createAt DESC');
+    return db.query(
+      'notes',
+      orderBy: 'updatedAt ASC, createdAt ASC',
+    );
   }
 
   Future<int> addNote(String title, String content,
@@ -85,7 +88,12 @@ class DatabaseHelper {
     final db = await database;
     return db.update(
       'notes',
-      {'title': title, 'content': content, 'starred': starred ? 1 : 0},
+      {
+        'title': title,
+        'content': content,
+        'starred': starred ? 1 : 0,
+        'createAt': DateTime.now().toIso8601String(),
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -143,6 +151,7 @@ class DatabaseHelper {
   Future<List<Map<String, dynamic>>> getActiveNotes() async {
     final db = await database;
     return db.query(
+      orderBy: 'createAt DESC',
       'notes',
       where: 'isDeleted = ? AND  isLocked = ?',
       whereArgs: [0, 0],

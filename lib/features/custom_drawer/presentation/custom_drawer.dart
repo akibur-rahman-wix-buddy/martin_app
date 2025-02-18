@@ -81,7 +81,10 @@ class _CustomDrawerState extends State<CustomDrawer> {
         String fileName = file.name;
 
         if (content.isNotEmpty) {
-          await _dbHelper.addNote(fileName, contentJson);
+          await _dbHelper.addNote(
+            fileName,
+            contentJson,
+          );
           _uploadedFiles.add(fileName);
         }
       }

@@ -452,11 +452,22 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextFontStyle.textStylec17cA1ABCCInter700,
                         ),
                         UIHelper.verticalSpace(4.h),
+                        // Text(
+                        //   note['createAt'] != null
+                        //       ? DateFormat('h:mm a')
+                        //           .format(DateTime.parse(note['createAt']))
+                        //       : 'No Title',
+                        //   style: TextFontStyle.textStylec17cA1ABCCInter700
+                        //       .copyWith(fontSize: 12.sp),
+                        //   maxLines: 1,
+                        //   overflow: TextOverflow.ellipsis,
+                        // ),
                         Text(
-                          note['createAt'] != null
-                              ? DateFormat('h:mm a')
-                                  .format(DateTime.parse(note['createAt']))
-                              : 'No Title',
+                          note['updatedAt'] != null
+                              ? DateFormat('h:mm a').format(DateTime.parse(
+                                  note['updatedAt'])) // Display updated time
+                              : DateFormat('h:mm a').format(DateTime.parse(
+                                  note['createAt'])), // Fallback to create time
                           style: TextFontStyle.textStylec17cA1ABCCInter700
                               .copyWith(fontSize: 12.sp),
                           maxLines: 1,
