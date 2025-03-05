@@ -259,7 +259,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.black),
+          icon: Icon(Icons.menu),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
@@ -272,12 +272,14 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                 onChanged: _onSearchQueryChanged,
                 decoration: InputDecoration(
                   hintText: 'Search Notes...',
-                  hintStyle: TextStyle(color: Colors.black),
+                  // hintStyle: TextStyle(color: Colors.black),
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.black),
+                // style: TextStyle(color: Colors.black),
               )
-            : Text('Lock Notes', style: TextStyle(color: Colors.black)),
+            : Text(
+                'Lock Notes',
+              ),
         actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -293,7 +295,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
               },
               child: Icon(
                 _isSearching ? Icons.close : Icons.search,
-                color: Colors.black,
+                // color: Colors.black,
                 size: 28.sp,
               ),
             ),

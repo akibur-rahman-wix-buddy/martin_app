@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../constants/text_font_style.dart';
 import '../../../../gen/colors.gen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -77,6 +78,11 @@ class NotesCarousel extends StatelessWidget {
                                     maxLines: 5,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
+                                    style: TextFontStyle
+                                        .textStylec17cA1ABCCInter700
+                                        .copyWith(
+                                      fontSize: 14.sp,
+                                    ),
                                   )
                                 : QuillEditor(
                                     controller: _controller,

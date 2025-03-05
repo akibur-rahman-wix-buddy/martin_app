@@ -100,7 +100,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
         leading: IconButton(
           icon: Icon(
             Icons.menu,
-            color: Colors.black,
+            // color: Colors.black,
           ),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
@@ -110,13 +110,13 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
         title: Row(
           children: [
             Text(
-                _selectedNotes.isEmpty
-                    ? 'Recycle Bin'
-                    : '${_selectedNotes.length} Selected',
-                style: TextStyle(color: Colors.black)),
+              _selectedNotes.isEmpty
+                  ? 'Recycle Bin'
+                  : '${_selectedNotes.length} Selected',
+            ),
             if (!_isSelecting)
               Text(' (${_recycleBinNotes.length} notes)',
-                  style: TextStyle(color: Colors.black, fontSize: 15.sp)),
+                  style: TextStyle(fontSize: 15.sp)),
           ],
         ),
         actions: [
@@ -141,8 +141,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                 onTap: _restoreSelectedNotes,
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 20.h),
-                  child: Text('Restore',
-                      style: TextStyle(color: Colors.black, fontSize: 12.sp)),
+                  child: Text('Restore', style: TextStyle(fontSize: 12.sp)),
                 )),
           if (_selectedNotes.isNotEmpty)
             InkWell(
@@ -155,8 +154,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                 child: Padding(
                   padding:
                       EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
-                  child: Text('Delete',
-                      style: TextStyle(color: Colors.black, fontSize: 12.sp)),
+                  child: Text('Delete', style: TextStyle(fontSize: 12.sp)),
                 )),
         ],
       ),

@@ -344,10 +344,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.black),
+          // iconTheme: IconThemeData(color: Colors.black),
           title: Text(
             _isNewNote ? 'New Note' : 'Edit Note',
-            style: TextFontStyle.textStylec17c000000Poppins400,
+            // style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
             PopupMenuButton<String>(
@@ -364,7 +364,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   child: Row(
                     children: [
                       Icon(_isStarred ? Icons.star : Icons.star_border,
-                          color: _isStarred ? Colors.amber : Colors.black),
+                          color: _isStarred ? Colors.amber : Colors.white),
                       SizedBox(width: 10),
                       Text("Starred"),
                     ],
@@ -374,7 +374,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: "lock",
                   child: Row(
                     children: [
-                      Icon(Icons.lock, color: Colors.black),
+                      Icon(Icons.lock),
                       SizedBox(width: 10.w),
                       Text("Lock"),
                     ],
@@ -408,7 +408,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       configurations: QuillEditorConfigurations(
                         placeholder: 'Write your note.....',
                         customStyleBuilder: (attribute) =>
-                            TextStyle(fontSize: 16.sp),
+                            TextStyle(fontSize: 16.sp, color: Colors.black),
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                       ),
                     ),

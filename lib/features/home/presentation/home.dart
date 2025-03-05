@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:notely/features/home/presentation/widgets/carousel_widget.dart';
 import 'package:notely/features/home/presentation/widgets/file_saver.dart';
 import '../../../common_widgets/not_found_widget.dart';
@@ -16,6 +17,7 @@ import '../../../helpers/helper_methods.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
 import '../../database/db_helper.dart';
+import '../../theme_controller/theme_controller.dart';
 import 'edit_notes/note_edit_screen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -71,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _notes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
   List<Map<String, dynamic>> _previousNotes = [];
+
+  final ThemeController themeController = Get.find<ThemeController>();
 
   List<String> _recentSearches = [];
   CarouselSliderController _carouselController = CarouselSliderController();
@@ -392,6 +396,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                           maxLines: 12,
                                           overflow: TextOverflow.ellipsis,
                                           textAlign: TextAlign.left,
+                                          style: TextFontStyle
+                                              .textStylec17cA1ABCCInter700
+                                              .copyWith(
+                                            fontSize: 14.sp,
+                                          ),
                                         )
                                       : QuillEditor(
                                           controller: _controller,
@@ -486,9 +495,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppBar(
       elevation: 1,
       shadowColor: AppColors.cFFFFFF,
-      iconTheme: IconThemeData(
-        color: Colors.black,
-      ),
+      // iconTheme: IconThemeData(
+      //   color: Colors.black,
+      // ),
       title: _isSearching
           ? TextField(
               controller: _searchController,
@@ -508,6 +517,17 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextFontStyle.textStylec17cA1ABCCInter700,
             ),
       actions: [
+        Obx(() => IconButton(
+              icon: Icon(
+                themeController.isDarkMode.value
+                    ? Icons.dark_mode
+                    : Icons.light_mode,
+                color: themeController.isDarkMode.value
+                    ? Colors.white
+                    : Colors.black,
+              ),
+              onPressed: themeController.toggleTheme,
+            )),
         if (_selectedNotes.isNotEmpty) ...[
           IconButton(
             icon: Icon(Icons.download, color: Colors.blue),

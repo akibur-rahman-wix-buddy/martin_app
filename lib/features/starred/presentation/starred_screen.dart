@@ -159,7 +159,6 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
           leading: IconButton(
             icon: Icon(
               Icons.menu,
-              color: Colors.black,
             ),
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
@@ -172,17 +171,16 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                   onChanged: _searchNotes,
                   decoration: InputDecoration(
                     hintText: 'Search Notes...',
-                    hintStyle: TextStyle(color: Colors.black),
+                    // hintStyle: TextStyle(color: Colors.black),
                     border: InputBorder.none,
                   ),
-                  style: TextStyle(color: Colors.black),
+                  // style: TextStyle(color: Colors.black),
                 )
               : Row(
                   children: [
                     if (!_isSearching)
                       Text(
                         'Starred',
-                        style: TextStyle(color: Colors.black),
                       ),
                     Icon(
                       Icons.star,
