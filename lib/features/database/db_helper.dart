@@ -19,45 +19,52 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'my_database');
 
-    return openDatabase(
-      path,
-      version: 2, // Increase the version for upgrades
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE notes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            content TEXT,
-            createAt TEXT,
-            isDeleted INTEGER DEFAULT 0,
-            deletedAt TEXT,
-            starred INTEGER DEFAULT 0,
-            isLocked INTEGER DEFAULT 0,
-            password TEXT
+    return openDatabase(path, version: 2, // Increase the version for upgrades
+        onCreate: (db, version) async {
+      await db.execute('PRAGMA foreign_keys = ON;');
+      await db.execute('''
+        CREATE TABLE notes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          content TEXT,
+          createAt TEXT,
+          isDeleted INTEGER DEFAULT 0,
+          deletedAt TEXT,
+          starred INTEGER DEFAULT 0,
+          isLocked INTEGER DEFAULT 0,
+          password TEXT
           
-          )
-        ''');
+        )
+      ''');
 
+      await db.execute('''
+        CREATE TABLE recent_searches (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          query TEXT NOT NULL,
+          timestamp INTEGER NOT NULL
+        )
+      ''');
+
+      // Add the photos table creation
+      await db.execute('''
+        CREATE TABLE photos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          path TEXT NOT NULL,
+          note_id INTEGER,
+          FOREIGN KEY (note_id) REFERENCES notes(id) ON DELETE CASCADE
+        )
+      ''');
+    }, onUpgrade: (db, oldVersion, newVersion) async {
+      if (oldVersion < 2) {
         await db.execute('''
-          CREATE TABLE recent_searches (
+          CREATE TABLE IF NOT EXISTS recent_searches (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             query TEXT NOT NULL,
             timestamp INTEGER NOT NULL
           )
         ''');
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          await db.execute('''
-            CREATE TABLE IF NOT EXISTS recent_searches (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              query TEXT NOT NULL,
-              timestamp INTEGER NOT NULL
-            )
-          ''');
-        }
-      },
-    );
+      }
+    });
   }
 
   Future<List<Map<String, dynamic>>> getNotes() async {
@@ -277,4 +284,42 @@ class DatabaseHelper {
   //       .rawQuery('SELECT COUNT(*) as count FROM notes WHERE is_edited = 1');
   //   return Sqflite.firstIntValue(result) ?? 0;
   // }
+
+  Future<int> insertPhoto(String path, int noteId) async {
+    final db = await database;
+    return await db.insert(
+      'photos',
+      {'path': path, 'note_id': noteId},
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getPhotos() async {
+    final db = await database;
+    return await db.query('photos');
+  }
+
+  Future<int> deletePhoto(int id) async {
+    final db = await database;
+    return await db.delete('photos', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<Map<String, dynamic>>> filterData(
+      {required String filed,
+      required int value,
+      required String table}) async {
+    final db = await database;
+    try {
+      // Query the database with a filter on measurementType
+      final List<Map<String, dynamic>> result = await db.query(
+        table,
+        where: '$filed = ?',
+        whereArgs: [value],
+      );
+
+      // Return the filtered data
+      return result;
+    } catch (e) {
+      return [];
+    }
+  }
 }

@@ -175,6 +175,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getPhotos(int noteId) async {
+    final photos = await DatabaseHelper().filterData(
+      filed: 'note_id',
+      value: noteId,
+      table: 'photos',
+    );
+
+    return photos;
+  }
+
   void _onSearchQueryChanged(String query) {
     setState(() {
       _searchQuery = query;
@@ -344,138 +354,188 @@ class _HomeScreenState extends State<HomeScreen> {
                   final note = _filteredNotes[index];
                   bool isSelected = _selectedNotes.contains(note['id']);
 
-                  return GestureDetector(
-                    onLongPress: () {
-                      setState(() {
-                        _isSelecting = true;
-                      });
-                      _toggleNoteSelection(note['id']);
-                    },
-                    onTap: () {
-                      if (_selectedNotes.isEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => NoteEditorScreen(
-                                note: note,
-                                onSave: () {
-                                  _fetchNotes();
-                                  _loadNoteCounts();
-                                }),
-                          ),
-                        );
-                      } else {
-                        // Handle selection mode
-                        _toggleNoteSelection(note['id']);
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            AnimatedContainer(
-                              height: 250.h,
-                              width: double.infinity,
-                              duration: Duration(milliseconds: 200),
-                              margin: EdgeInsets.all(4.sp),
-                              padding: EdgeInsets.all(12.sp),
-                              decoration: BoxDecoration(
-                                color: AppColors.cFFFFFF,
-                                borderRadius: BorderRadius.circular(22.r),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  note['content'] is String
-                                      ? Text(
-                                          extractPlainText(note['content']),
-                                          maxLines: 12,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.left,
-                                        )
-                                      : QuillEditor(
-                                          controller: _controller,
-                                          focusNode: FocusNode(),
-                                          scrollController: ScrollController(),
+                  return FutureBuilder(
+                      future: getPhotos(note['id']),
+                      builder: (context, photos) {
+                        if (!photos.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return GestureDetector(
+                            onLongPress: () {
+                              setState(() {
+                                _isSelecting = true;
+                              });
+                              _toggleNoteSelection(note['id']);
+                            },
+                            onTap: () {
+                              if (_selectedNotes.isEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => NoteEditorScreen(
+                                        note: note,
+                                        onSave: () {
+                                          _fetchNotes();
+                                          _loadNoteCounts();
+                                        }),
+                                  ),
+                                );
+                              } else {
+                                // Handle selection mode
+                                _toggleNoteSelection(note['id']);
+                              }
+                            },
+                            child: Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    AnimatedContainer(
+                                      height: 250.h,
+                                      width: double.infinity,
+                                      duration: Duration(milliseconds: 200),
+                                      margin: EdgeInsets.all(4.sp),
+                                      padding: EdgeInsets.all(12.sp),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.cFFFFFF,
+                                        borderRadius:
+                                            BorderRadius.circular(22.r),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          note['content'] is String
+                                              ? Text(
+                                                  extractPlainText(
+                                                      note['content']),
+                                                  maxLines: 12,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.left,
+                                                )
+                                              : QuillEditor(
+                                                  controller: _controller,
+                                                  focusNode: FocusNode(),
+                                                  scrollController:
+                                                      ScrollController(),
+                                                ),
+                                          Expanded(
+                                            child: GridView.builder(
+                                              padding: EdgeInsets.all(8),
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 3,
+                                                crossAxisSpacing: 8,
+                                                mainAxisSpacing: 8,
+                                              ),
+                                              itemCount: photos.data!.length,
+                                              itemBuilder: (context, index) {
+                                                final photo =
+                                                    photos.data![index];
+                                                return Stack(
+                                                  children: [
+                                                    Image.file(
+                                                      File(
+                                                        photo["path"],
+                                                      ),
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      height: double.infinity,
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (_isSelecting)
+                                      Positioned(
+                                        top: 8.sp,
+                                        right: 8.sp,
+                                        child: Container(
+                                          height: 25.h,
+                                          width: 25.w,
+                                          padding: EdgeInsets.zero,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? Colors.red
+                                                  : Colors.grey,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Transform.scale(
+                                            scale: 1.2,
+                                            child: Checkbox(
+                                              value: isSelected,
+                                              onChanged: (bool? value) {
+                                                _toggleNoteSelection(
+                                                    note['id']);
+                                              },
+                                              activeColor: Colors.red,
+                                              checkColor: Colors.white,
+                                              shape: CircleBorder(),
+                                            ),
+                                          ),
                                         ),
-                                ],
-                              ),
+                                      ),
+                                    if (!_isSelecting)
+                                      Positioned(
+                                        bottom: 8.sp,
+                                        right: 8.sp,
+                                        child: IconButton(
+                                          icon: Icon(Icons.download,
+                                              color: Colors.blue),
+                                          onPressed: () =>
+                                              _requestPermissionsAndDownload(
+                                                  note['title'],
+                                                  note['content']),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                Text(
+                                  note['title'] ?? 'No title',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      TextFontStyle.textStylec17cA1ABCCInter700,
+                                ),
+                                UIHelper.verticalSpace(4.h),
+                                // Text(
+                                //   note['createAt'] != null
+                                //       ? DateFormat('h:mm a')
+                                //           .format(DateTime.parse(note['createAt']))
+                                //       : 'No Title',
+                                //   style: TextFontStyle.textStylec17cA1ABCCInter700
+                                //       .copyWith(fontSize: 12.sp),
+                                //   maxLines: 1,
+                                //   overflow: TextOverflow.ellipsis,
+                                // ),
+                                Text(
+                                  note['updatedAt'] != null
+                                      ? DateFormat('h:mm a').format(
+                                          DateTime.parse(note[
+                                              'updatedAt'])) // Display updated time
+                                      : DateFormat('h:mm a').format(
+                                          DateTime.parse(note[
+                                              'createAt'])), // Fallback to create time
+                                  style: TextFontStyle
+                                      .textStylec17cA1ABCCInter700
+                                      .copyWith(fontSize: 12.sp),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            if (_isSelecting)
-                              Positioned(
-                                top: 8.sp,
-                                right: 8.sp,
-                                child: Container(
-                                  height: 25.h,
-                                  width: 25.w,
-                                  padding: EdgeInsets.zero,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color:
-                                          isSelected ? Colors.red : Colors.grey,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Transform.scale(
-                                    scale: 1.2,
-                                    child: Checkbox(
-                                      value: isSelected,
-                                      onChanged: (bool? value) {
-                                        _toggleNoteSelection(note['id']);
-                                      },
-                                      activeColor: Colors.red,
-                                      checkColor: Colors.white,
-                                      shape: CircleBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (!_isSelecting)
-                              Positioned(
-                                bottom: 8.sp,
-                                right: 8.sp,
-                                child: IconButton(
-                                  icon:
-                                      Icon(Icons.download, color: Colors.blue),
-                                  onPressed: () =>
-                                      _requestPermissionsAndDownload(
-                                          note['title'], note['content']),
-                                ),
-                              ),
-                          ],
-                        ),
-                        Text(
-                          note['title'] ?? 'No title',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextFontStyle.textStylec17cA1ABCCInter700,
-                        ),
-                        UIHelper.verticalSpace(4.h),
-                        // Text(
-                        //   note['createAt'] != null
-                        //       ? DateFormat('h:mm a')
-                        //           .format(DateTime.parse(note['createAt']))
-                        //       : 'No Title',
-                        //   style: TextFontStyle.textStylec17cA1ABCCInter700
-                        //       .copyWith(fontSize: 12.sp),
-                        //   maxLines: 1,
-                        //   overflow: TextOverflow.ellipsis,
-                        // ),
-                        Text(
-                          note['updatedAt'] != null
-                              ? DateFormat('h:mm a').format(DateTime.parse(
-                                  note['updatedAt'])) // Display updated time
-                              : DateFormat('h:mm a').format(DateTime.parse(
-                                  note['createAt'])), // Fallback to create time
-                          style: TextFontStyle.textStylec17cA1ABCCInter700
-                              .copyWith(fontSize: 12.sp),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
+                          );
+                        }
+                      });
                 },
               ),
       ],

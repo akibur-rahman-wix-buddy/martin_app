@@ -73,6 +73,17 @@ class UtillScreenMobile extends StatelessWidget {
                   primarySwatch: CustomTheme.kToDark,
                   useMaterial3: false,
                   scaffoldBackgroundColor: AppColors.allPrimaryColor,
+                  scrollbarTheme: ScrollbarThemeData(
+                    minThumbLength: 4,
+                    thumbColor: MaterialStateProperty.all(
+                      AppColors.cA1ABCC,
+                    ), // Change scrollbar color
+                    trackColor: MaterialStateProperty.all(
+                        Colors.grey[300]), // Track color
+                    radius: Radius.circular(10), // Rounded corners
+                    thickness:
+                        MaterialStateProperty.all(6), // Thickness of scrollbar
+                  ),
                   appBarTheme: const AppBarTheme(
                       color: AppColors.allPrimaryColor, elevation: 0)),
               debugShowCheckedModeBanner: false,
