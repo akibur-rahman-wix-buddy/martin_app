@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common_widgets/not_found_widget.dart';
@@ -15,6 +16,8 @@ import '../../database/db_helper.dart';
 import '../../home/presentation/edit_notes/note_edit_screen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
+import '../../theme_controller/theme_controller.dart';
+
 class StarredNotesScreen extends StatefulWidget {
   @override
   _StarredNotesScreenState createState() => _StarredNotesScreenState();
@@ -26,6 +29,7 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
   quill.QuillController _controller = quill.QuillController.basic();
   List<Map<String, dynamic>> _starredNotes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
+  final ThemeController themeController = Get.find<ThemeController>();
   bool _isSelecting = false;
   Set<int> _selectedNoteIds = Set<int>(); // Track selected notes
   String _searchQuery = "";
@@ -209,7 +213,9 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                       EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Image.asset(
                     Assets.icons.searchIcon.path,
-                    color: Colors.black,
+                    color: themeController.isDarkMode.value
+                        ? const Color.fromARGB(255, 255, 255, 255)
+                        : Color(0xFF1E1E1E),
                   ),
                 ),
               ),
@@ -221,7 +227,12 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                 },
               ),
             PopupMenuButton<String>(
-              iconColor: Colors.black,
+              iconColor: themeController.isDarkMode.value
+                  ? const Color.fromARGB(255, 255, 255, 255)
+                  : Color(0xFF1E1E1E),
+              color: themeController.isDarkMode.value
+                  ? Color(0xFF1E1E1E)
+                  : const Color.fromARGB(255, 255, 255, 255),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -306,7 +317,9 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                               margin: EdgeInsets.all(4.sp),
                               padding: EdgeInsets.all(12.sp),
                               decoration: BoxDecoration(
-                                color: AppColors.cFFFFFF,
+                                color: themeController.isDarkMode.value
+                                    ? Color(0xFF1E1E1E)
+                                    : const Color.fromARGB(255, 255, 255, 255),
                                 borderRadius: BorderRadius.circular(22.r),
                               ),
                               child: Column(

@@ -3,14 +3,18 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import '../../../../constants/text_font_style.dart';
 import '../../../../gen/colors.gen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+
+import '../../../theme_controller/theme_controller.dart';
 
 class NotesCarousel extends StatelessWidget {
   final List<Map<String, dynamic>> previousNotes;
   final int currentSlideIndex;
   final CarouselSliderController carouselController;
+  final ThemeController themeController = Get.find<ThemeController>();
 
   NotesCarousel({
     required this.previousNotes,
@@ -64,7 +68,9 @@ class NotesCarousel extends StatelessWidget {
                         margin: EdgeInsets.symmetric(horizontal: 8.w),
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                         decoration: BoxDecoration(
-                          color: AppColors.cEFF0F3,
+                          color: themeController.isDarkMode.value
+                              ? Color(0xFF1E1E1E)
+                              : AppColors.cFFFFFF,
                           borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: Column(

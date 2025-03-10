@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:notely/features/custom_drawer/presentation/custom_drawer.dart';
 
@@ -11,6 +12,7 @@ import '../../../constants/text_font_style.dart';
 import '../../../gen/colors.gen.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../database/db_helper.dart';
+import '../../theme_controller/theme_controller.dart';
 import 'widgets/show_permamently_delete_dialog.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -24,6 +26,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
   quill.QuillController _controller = quill.QuillController.basic();
   List<Map<String, dynamic>> _recycleBinNotes = [];
   Set<int> _selectedNotes = Set<int>();
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   void initState() {
@@ -121,28 +124,27 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
         ),
         actions: [
           if (!_isSelecting)
-            Padding(
-              padding: EdgeInsets.all(16.sp),
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    _isSelecting = true;
-                    _selectedNotes.clear();
-                  });
-                },
-                child: Text(
-                  'Select',
-                  style: TextFontStyle.textStylec17c000000Poppins400,
+            InkWell(
+              onTap: () {
+                setState(() {
+                  _isSelecting = true;
+                  _selectedNotes.clear();
+                });
+              },
+              child: Text(
+                'Select',
+                style: TextFontStyle.textStylec17c000000Poppins400.copyWith(
+                  color: themeController.isDarkMode.value
+                      ? AppColors.cFFFFFF
+                      : AppColors.c000000,
                 ),
               ),
             ),
           if (_selectedNotes.isNotEmpty)
             InkWell(
                 onTap: _restoreSelectedNotes,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20.h),
-                  child: Text('Restore', style: TextStyle(fontSize: 12.sp)),
-                )),
+                child: Text('Restore', style: TextStyle(fontSize: 12.sp))),
+          UIHelper.horizontalSpaceSmall,
           if (_selectedNotes.isNotEmpty)
             InkWell(
                 // onTap: _permanentlyDeleteSelectedNotes,
@@ -152,8 +154,7 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                   });
                 },
                 child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+                  padding: EdgeInsets.only(right: 20.w),
                   child: Text('Delete', style: TextStyle(fontSize: 12.sp)),
                 )),
         ],
@@ -214,7 +215,9 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                             duration: Duration(milliseconds: 200),
                             margin: EdgeInsets.all(4.sp),
                             decoration: BoxDecoration(
-                              color: AppColors.cFFFFFF,
+                              color: themeController.isDarkMode.value
+                                  ? Color(0xFF1E1E1E)
+                                  : AppColors.cFFFFFF,
                               borderRadius: BorderRadius.circular(22.r),
                             ),
                             child: Column(
@@ -260,7 +263,10 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
                                   alignment: Alignment.bottomCenter,
                                   padding: EdgeInsets.all(6.sp),
                                   decoration: BoxDecoration(
-                                      color: AppColors.cBFBBBB,
+                                      color: themeController.isDarkMode.value
+                                          ? const Color.fromARGB(
+                                              255, 66, 63, 63)
+                                          : AppColors.cFFFFFF,
                                       borderRadius: BorderRadius.only(
                                         bottomLeft: Radius.circular(12.r),
                                         bottomRight: Radius.circular(12.r),

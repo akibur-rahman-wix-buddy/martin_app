@@ -408,7 +408,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       configurations: QuillEditorConfigurations(
                         placeholder: 'Write your note.....',
                         customStyleBuilder: (attribute) =>
-                            TextStyle(fontSize: 16.sp, color: Colors.black),
+                            TextStyle(fontSize: 16.sp),
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
                       ),
                     ),

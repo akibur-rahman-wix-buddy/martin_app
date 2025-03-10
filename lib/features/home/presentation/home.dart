@@ -306,8 +306,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          foregroundColor: AppColors.cFFFFFF,
-          backgroundColor: AppColors.cA1ABCC,
+          foregroundColor: themeController.isDarkMode.value
+              ? AppColors.cFFFFFF
+              : Color.fromARGB(255, 20, 20, 20),
+          backgroundColor: themeController.isDarkMode.value
+              ? Color.fromARGB(255, 20, 20, 20)
+              : AppColors.cFFFFFF,
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -384,7 +388,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               margin: EdgeInsets.all(4.sp),
                               padding: EdgeInsets.all(12.sp),
                               decoration: BoxDecoration(
-                                color: AppColors.cFFFFFF,
+                                color: themeController.isDarkMode.value
+                                    ? Color(0xFF1E1E1E)
+                                    : const Color.fromARGB(255, 255, 255, 255),
                                 borderRadius: BorderRadius.circular(22.r),
                               ),
                               child: Column(
@@ -520,8 +526,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Obx(() => IconButton(
               icon: Icon(
                 themeController.isDarkMode.value
-                    ? Icons.dark_mode
-                    : Icons.light_mode,
+                    ? Icons.nightlight_round // Dark mode icon (Moon)
+                    : Icons.wb_sunny, // Light mode icon (Sun)
                 color: themeController.isDarkMode.value
                     ? Colors.white
                     : Colors.black,
@@ -562,6 +568,9 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         PopupMenuButton<String>(
+          color: themeController.isDarkMode.value
+              ? Color(0xFF1E1E1E)
+              : const Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),

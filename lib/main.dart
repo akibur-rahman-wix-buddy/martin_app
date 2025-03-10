@@ -154,7 +154,7 @@ class UtillScreenMobile extends StatelessWidget {
       splitScreenMode: true,
       builder: (_, child) {
         return Obx(() => GetMaterialApp(
-              color: AppColors.allPrimaryColor,
+              // color: AppColors.allPrimaryColor,
               theme: ThemeData(
                 brightness: Brightness.light, // Light Mode
                 primarySwatch: CustomTheme.kToDark,
