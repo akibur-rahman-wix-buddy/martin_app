@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common_widgets/not_found_widget.dart';
@@ -15,12 +16,16 @@ import '../../database/db_helper.dart';
 import '../../home/presentation/edit_notes/note_edit_screen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
+import '../../theme_controller/theme_controller.dart';
+
 class StarredNotesScreen extends StatefulWidget {
   @override
   _StarredNotesScreenState createState() => _StarredNotesScreenState();
 }
 
 class _StarredNotesScreenState extends State<StarredNotesScreen> {
+  final ThemeController themeController = Get.find<ThemeController>();
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   quill.QuillController _controller = quill.QuillController.basic();
@@ -159,7 +164,6 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
           leading: IconButton(
             icon: Icon(
               Icons.menu,
-              color: Colors.black,
             ),
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
@@ -172,17 +176,16 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                   onChanged: _searchNotes,
                   decoration: InputDecoration(
                     hintText: 'Search Notes...',
-                    hintStyle: TextStyle(color: Colors.black),
+                    // hintStyle: TextStyle(color: Colors.black),
                     border: InputBorder.none,
                   ),
-                  style: TextStyle(color: Colors.black),
+                  // style: TextStyle(color: Colors.black),
                 )
               : Row(
                   children: [
                     if (!_isSearching)
                       Text(
                         'Starred',
-                        style: TextStyle(color: Colors.black),
                       ),
                     Icon(
                       Icons.star,
@@ -211,7 +214,9 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                       EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   child: Image.asset(
                     Assets.icons.searchIcon.path,
-                    color: Colors.black,
+                    color: themeController.isDarkMode.value
+                        ? const Color.fromARGB(255, 255, 255, 255)
+                        : Color(0xFF1E1E1E),
                   ),
                 ),
               ),
@@ -223,7 +228,12 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                 },
               ),
             PopupMenuButton<String>(
-              iconColor: Colors.black,
+              iconColor: themeController.isDarkMode.value
+                  ? const Color.fromARGB(255, 255, 255, 255)
+                  : Color(0xFF1E1E1E),
+              color: themeController.isDarkMode.value
+                  ? Color(0xFF1E1E1E)
+                  : const Color.fromARGB(255, 255, 255, 255),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -308,7 +318,9 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                               margin: EdgeInsets.all(4.sp),
                               padding: EdgeInsets.all(12.sp),
                               decoration: BoxDecoration(
-                                color: AppColors.cFFFFFF,
+                                color: themeController.isDarkMode.value
+                                    ? Color(0xFF1E1E1E)
+                                    : const Color.fromARGB(255, 255, 255, 255),
                                 borderRadius: BorderRadius.circular(22.r),
                               ),
                               child: Column(

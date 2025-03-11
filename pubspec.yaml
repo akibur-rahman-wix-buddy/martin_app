@@ -57,6 +57,7 @@ dependencies:
   permission_handler: ^10.4.0
   image_picker: ^1.1.2
   uuid: ^4.5.1
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:

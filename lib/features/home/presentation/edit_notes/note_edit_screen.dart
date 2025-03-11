@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notely/constants/text_font_style.dart';
 import 'package:notely/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:notely/helpers/navigation_service.dart';
+import 'package:photo_view/photo_view.dart';
 import '../../../../constants/app_constants.dart';
 import '../../../../helpers/di.dart';
 import '../../../../helpers/helper_methods.dart';
@@ -195,10 +196,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       onWillPop: _onBackPressed,
       child: Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: Colors.black),
+          // iconTheme: IconThemeData(color: Colors.black),
           title: Text(
             _isNewNote ? 'New Note' : 'Edit Note',
-            style: TextFontStyle.textStylec17c000000Poppins400,
+            // style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
             IconButton(onPressed: _pickImage, icon: Icon(Icons.photo)),
@@ -216,7 +217,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   child: Row(
                     children: [
                       Icon(_isStarred ? Icons.star : Icons.star_border,
-                          color: _isStarred ? Colors.amber : Colors.black),
+                          color: _isStarred ? Colors.amber : Colors.white),
                       SizedBox(width: 10),
                       Text("Starred"),
                     ],
@@ -226,7 +227,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: "lock",
                   child: Row(
                     children: [
-                      Icon(Icons.lock, color: Colors.black),
+                      Icon(Icons.lock),
                       SizedBox(width: 10.w),
                       Text("Lock"),
                     ],
@@ -256,75 +257,96 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     ),
                   ),
                   Expanded(
-                    child: Column(
-                      children: [
-                        QuillEditor.basic(
-                          controller: _quillController,
-                          configurations: QuillEditorConfigurations(
-                            placeholder: 'Write your note.....',
-                            customStyleBuilder: (attribute) =>
-                                TextStyle(fontSize: 16.sp),
-                            padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          QuillEditor.basic(
+                            controller: _quillController,
+                            configurations: QuillEditorConfigurations(
+                              placeholder: 'Write your note.....',
+                              customStyleBuilder: (attribute) =>
+                                  TextStyle(fontSize: 16.sp),
+                              padding: EdgeInsets.symmetric(horizontal: 16.w),
+                            ),
                           ),
-                        ),
-                        imagesData.images
-                                .where((element) => element.isDeleted == false)
-                                .toList()
-                                .isEmpty
-                            ? Center(child: Text(''))
-                            : SizedBox(
-                                height: 100,
-                                child: GridView.builder(
-                                  padding: EdgeInsets.all(8),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 3,
-                                    crossAxisSpacing: 8,
-                                    mainAxisSpacing: 8,
-                                  ),
-                                  itemCount: imagesData.images
-                                      .where((element) =>
-                                          element.isDeleted == false)
-                                      .length,
-                                  itemBuilder: (context, index) {
-                                    final photo = imagesData.images[index];
-                                    log(photo.path);
-                                    return Stack(
-                                      children: [
-                                        Image.file(
-                                          File(
-                                            imagesData.images
-                                                .where((element) =>
-                                                    element.isDeleted == false)
-                                                .toList()[index]
-                                                .path,
-                                          ),
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        ),
-                                        Positioned(
-                                          top: 4,
-                                          right: 4,
-                                          child: IconButton(
-                                              icon: Icon(Icons.delete,
-                                                  color: Colors.red),
-                                              onPressed: () {
+                          imagesData.images
+                                  .where(
+                                      (element) => element.isDeleted == false)
+                                  .toList()
+                                  .isEmpty
+                              ? Center(child: Text(''))
+                              : SizedBox(
+                                  height: 100,
+                                  child: GridView.builder(
+                                    padding: EdgeInsets.all(8),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 8,
+                                      mainAxisSpacing: 8,
+                                    ),
+                                    itemCount: imagesData.images
+                                        .where((element) =>
+                                            element.isDeleted == false)
+                                        .length,
+                                    itemBuilder: (context, index) {
+                                      final photo = imagesData.images[index];
+                                      log(photo.path);
+                                      return Stack(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (context) => Dialog(
+                                                  child: Container(
+                                                    width: double.infinity,
+                                                    height: 400,
+                                                    child: PhotoView(
+                                                      imageProvider: FileImage(
+                                                          File(photo.path)),
+                                                    ),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Image.file(
+                                              File(
                                                 imagesData.images
                                                     .where((element) =>
                                                         element.isDeleted ==
                                                         false)
                                                     .toList()[index]
-                                                    .isDeleted = true;
-                                                setState(() {});
-                                              }),
-                                        ),
-                                      ],
-                                    );
-                                  },
+                                                    .path,
+                                              ),
+                                              fit: BoxFit.cover,
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 4,
+                                            right: 4,
+                                            child: IconButton(
+                                                icon: Icon(Icons.delete,
+                                                    color: Colors.red),
+                                                onPressed: () {
+                                                  imagesData.images
+                                                      .where((element) =>
+                                                          element.isDeleted ==
+                                                          false)
+                                                      .toList()[index]
+                                                      .isDeleted = true;
+                                                  setState(() {});
+                                                }),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   QuillToolbar.simple(
