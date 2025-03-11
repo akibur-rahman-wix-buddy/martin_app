@@ -10,6 +10,7 @@ import 'package:notely/features/lock_notes/presentation/widget/show_lock_dialog.
 import 'package:notely/helpers/navigation_service.dart';
 import '../../../../constants/app_constants.dart';
 import '../../../../helpers/di.dart';
+import '../../../../helpers/helper_methods.dart';
 import '../../../database/db_helper.dart';
 
 class NoteEditorScreen extends StatefulWidget {
@@ -120,10 +121,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       );
       for (var image in imagesData.images) {
         if (image.isNew) {
-          await DatabaseHelper().insertPhoto(image.path, noteId);
+          String? imagePath = await moveImageToPermanentPath(image.path);
+          if (imagePath != null)
+            await DatabaseHelper().insertPhoto(imagePath, noteId);
         }
         if (image.isDeleted) {
-          await DatabaseHelper().deletePhoto(image.id!);
+          // await DatabaseHelper().deletePhoto(image.id!);
         }
       }
 
@@ -136,9 +139,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     } else {
       await DatabaseHelper()
           .updateNote(widget.noteId!, title, contentJson, starred: _isStarred);
+
       for (var image in imagesData.images) {
         if (image.isNew) {
-          await DatabaseHelper().insertPhoto(image.path, widget.noteId!);
+          String? imagePath = await moveImageToPermanentPath(image.path);
+          if (imagePath != null)
+            await DatabaseHelper().insertPhoto(imagePath, widget.noteId!);
         }
         if (image.isDeleted) {
           await DatabaseHelper().deletePhoto(image.id!);
@@ -234,6 +240,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         body: _isLoading
             ? Center(child: CircularProgressIndicator())
             : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -264,8 +271,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                 .where((element) => element.isDeleted == false)
                                 .toList()
                                 .isEmpty
-                            ? Center(child: Text('No photos yet'))
-                            : Expanded(
+                            ? Center(child: Text(''))
+                            : SizedBox(
+                                height: 100,
                                 child: GridView.builder(
                                   padding: EdgeInsets.all(8),
                                   gridDelegate:
