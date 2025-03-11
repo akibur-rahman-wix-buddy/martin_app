@@ -201,6 +201,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:notely/features/lock_notes/presentation/widget/show_unlock_dialog.dart';
 import '../../../common_widgets/not_found_widget.dart';
@@ -210,6 +211,7 @@ import '../../../gen/colors.gen.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
 import '../../database/db_helper.dart';
+import '../../theme_controller/theme_controller.dart';
 
 class LockNotesScreen extends StatefulWidget {
   @override
@@ -220,6 +222,8 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map<String, dynamic>> _lockedNotes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
+
+  final ThemeController themeController = Get.find<ThemeController>();
 
   Set<int> _selectedNotes = {}; // Track selected notes
   bool _isSearching = false;
@@ -236,7 +240,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
         await DatabaseHelper().getLockedNotes();
     setState(() {
       _lockedNotes = lockedNotes;
-      _filteredNotes = lockedNotes; // Keep original list intact
+      _filteredNotes = lockedNotes;
     });
   }
 
@@ -259,7 +263,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.menu, color: Colors.black),
+          icon: Icon(Icons.menu),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
           },
@@ -272,12 +276,14 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                 onChanged: _onSearchQueryChanged,
                 decoration: InputDecoration(
                   hintText: 'Search Notes...',
-                  hintStyle: TextStyle(color: Colors.black),
+                  // hintStyle: TextStyle(color: Colors.black),
                   border: InputBorder.none,
                 ),
-                style: TextStyle(color: Colors.black),
+                // style: TextStyle(color: Colors.black),
               )
-            : Text('Lock Notes', style: TextStyle(color: Colors.black)),
+            : Text(
+                'Lock Notes',
+              ),
         actions: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -293,7 +299,7 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
               },
               child: Icon(
                 _isSearching ? Icons.close : Icons.search,
-                color: Colors.black,
+                // color: Colors.black,
                 size: 28.sp,
               ),
             ),
@@ -334,7 +340,9 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                       margin: EdgeInsets.all(4.sp),
                       padding: EdgeInsets.all(12.sp),
                       decoration: BoxDecoration(
-                        color: AppColors.cFFFFFF,
+                        color: themeController.isDarkMode.value
+                            ? Color(0xFF1E1E1E)
+                            : const Color.fromARGB(255, 255, 255, 255),
                         borderRadius: BorderRadius.circular(22.r),
                       ),
                       child: Column(
@@ -352,6 +360,9 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
                               child: Image.asset(
                                 Assets.icons.lock.path,
                                 height: 30.h,
+                                color: themeController.isDarkMode.value
+                                    ? AppColors.cFFFFFF
+                                    : Color(0xFF1E1E1E),
                               ),
                             ),
                           )

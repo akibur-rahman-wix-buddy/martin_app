@@ -199,7 +199,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
           Divider(), // Add a separator
           ListTile(
             leading: Icon(Icons.upload_file),
-            title: Text('Upload .txt File'),
+            title: Text('Upload Notes'),
             subtitle: _uploadedFiles.isNotEmpty
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

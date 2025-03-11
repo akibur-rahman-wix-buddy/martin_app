@@ -1,4 +1,5 @@
 // ignore_for_file: use_build_context_synchronously, unused_local_variable, avoid_print
+import 'package:uuid/uuid.dart';
 
 import 'dart:async';
 import 'dart:io';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 // import 'package:http/http.dart' as http;
 import '/helpers/di.dart';
 import '../common_widgets/custom_button.dart';
@@ -293,4 +295,31 @@ void rotation() {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+}
+
+Future<String?> moveImageToPermanentPath(String tempPath) async {
+  try {
+    final File tempFile = File(tempPath);
+    if (!await tempFile.exists()) {
+      debugPrint("Temp file does not exist!");
+      return null;
+    }
+
+    // Generate a random filename
+    var uuid = Uuid();
+    String randomFileName = "${uuid.v4()}.jpg"; // Generates a unique name
+
+    // Get the app's document directory
+    final Directory appDir = await getApplicationDocumentsDirectory();
+    final String permanentPath = '${appDir.path}/$randomFileName';
+
+    // Move the file to the permanent location
+    final File permanentFile = await tempFile.copy(permanentPath);
+
+    debugPrint("Image moved to: $permanentPath");
+    return permanentFile.path;
+  } catch (e) {
+    debugPrint("Error moving image: $e");
+    return null;
+  }
 }

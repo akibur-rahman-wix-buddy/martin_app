@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:notely/features/home/presentation/widgets/carousel_widget.dart';
 import 'package:notely/features/home/presentation/widgets/file_saver.dart';
 import '../../../common_widgets/not_found_widget.dart';
@@ -16,6 +17,7 @@ import '../../../helpers/helper_methods.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../custom_drawer/presentation/custom_drawer.dart';
 import '../../database/db_helper.dart';
+import '../../theme_controller/theme_controller.dart';
 import 'edit_notes/note_edit_screen.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 
@@ -27,7 +29,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final ThemeController themeController = Get.find<ThemeController>();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollbarController = ScrollController();
   TextEditingController _searchController = TextEditingController();
   quill.QuillController _controller = quill.QuillController.basic();
   bool _isScrolling = false;
@@ -175,14 +179,70 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getPhotos(int noteId) async {
+    final photos = await DatabaseHelper().filterData(
+      filed: 'note_id',
+      value: noteId,
+      table: 'photos',
+    );
+
+    return photos;
+  }
+
   void _onSearchQueryChanged(String query) {
     setState(() {
       _searchQuery = query;
       _filteredNotes = _notes.where((note) {
-        final content = note['title']?.toLowerCase() ?? '';
-        return content.contains(query.toLowerCase());
+        final title = note['title']?.toLowerCase() ?? '';
+        final content = note['content']?.toLowerCase() ?? '';
+        return title.contains(query.toLowerCase()) ||
+            content.contains(query.toLowerCase());
       }).toList();
     });
+  }
+
+  Widget _buildHighlightedText(String text, String query) {
+    if (query.isEmpty || !text.toLowerCase().contains(query.toLowerCase())) {
+      return Text(
+        text,
+        style: TextFontStyle.textStylec17cA1ABCCInter700,
+      );
+    }
+
+    List<TextSpan> spans = [];
+    int lastMatchEnd = 0;
+
+    for (int i = 0; i < text.length; i++) {
+      String char = text[i];
+      bool isMatch = query.toLowerCase().contains(char.toLowerCase());
+
+      if (isMatch) {
+        spans.add(
+          TextSpan(
+            text: char,
+            style: TextFontStyle.textStylec17cA1ABCCInter700.copyWith(
+                color: Colors.red, // Highlighted color
+                fontWeight: FontWeight.bold,
+                backgroundColor: Colors.grey),
+          ),
+        );
+      } else {
+        spans.add(
+          TextSpan(
+            text: char,
+            style: TextFontStyle.textStylec17cA1ABCCInter700.copyWith(
+              color: Colors.black,
+            ),
+          ),
+        );
+      }
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
   }
 
   bool _isSelecting = false;
@@ -234,35 +294,43 @@ class _HomeScreenState extends State<HomeScreen> {
         body: Stack(
           children: [
             if (_previousNotes.isNotEmpty)
-              SingleChildScrollView(
-                controller: _scrollController,
-                child: Column(
-                  children: [
-                    UIHelper.verticalSpace(4.h),
-                    Column(
-                      children: [
-                        Text(
-                          'Previous Notes',
-                          style: TextFontStyle.textStylec17cA09E9EPoppins700,
-                        ),
-                        UIHelper.verticalSpace(4.h),
-                        if (_previousNotes.isNotEmpty)
-                          NotesCarousel(
-                            previousNotes: _previousNotes,
-                            currentSlideIndex: _currentSlideIndex,
-                            carouselController: _carouselController,
+              Scrollbar(
+                controller: _scrollbarController,
+                thumbVisibility: false,
+                thickness: 6.0,
+                radius: const Radius.circular(8.0),
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  child: Column(
+                    children: [
+                      UIHelper.verticalSpace(4.h),
+                      Column(
+                        children: [
+                          Text(
+                            'Previous Notes',
+                            style: TextFontStyle.textStylec17cA09E9EPoppins700,
                           ),
-                        UIHelper.verticalSpace(6.h),
-                        Text(
-                          '${appData.read(kEditCount)}',
-                          style: TextFontStyle.textStylec17cA09E9EPoppins700
-                              .copyWith(fontSize: 16.sp),
-                        ),
-                        UIHelper.verticalSpace(6.h),
-                        _buildAllNotes(),
-                      ],
-                    ),
-                  ],
+                          UIHelper.verticalSpace(4.h),
+                          if (_previousNotes.isNotEmpty)
+                            NotesCarousel(
+                              previousNotes: _previousNotes,
+                              currentSlideIndex: _currentSlideIndex,
+                              carouselController: _carouselController,
+                            ),
+                          UIHelper.verticalSpace(6.h),
+                          Text(
+                            '${appData.read(kEditCount)}',
+                            style: TextFontStyle.textStylec17cA09E9EPoppins700
+                                .copyWith(fontSize: 16.sp),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          UIHelper.verticalSpace(6.h),
+                          _buildAllNotes(),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               )
             else
@@ -286,15 +354,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 12.h),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: AppColors.cCBD9F5,
-                        ),
+                            color: themeController.isDarkMode.value
+                                ? Colors.white
+                                : Colors.blue,
+                            width: 2),
                       ),
-                      child: Icon(Icons.arrow_upward, color: AppColors.cCBD9F5),
+                      child: Icon(Icons.arrow_upward,
+                          color: themeController.isDarkMode.value
+                              ? Colors.white
+                              : Colors.blue),
                     ),
                   ),
                 ),
@@ -302,8 +375,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         floatingActionButton: FloatingActionButton(
-          foregroundColor: AppColors.cFFFFFF,
-          backgroundColor: AppColors.cA1ABCC,
+          foregroundColor: themeController.isDarkMode.value
+              ? AppColors.cFFFFFF
+              : Color.fromARGB(255, 20, 20, 20),
+          backgroundColor: themeController.isDarkMode.value
+              ? Color.fromARGB(255, 48, 47, 47)
+              : AppColors.cFFFFFF,
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -327,8 +404,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         _filteredNotes.isEmpty
             ? Padding(
-                padding: EdgeInsets.all(20),
-                child: Text("No notes found", style: TextStyle(fontSize: 16)),
+                padding: EdgeInsets.only(top: 50.h),
+                child: Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "No notes found",
+                      style: TextFontStyle.textStylec17cA1ABCCInter700,
+                    ),
+                    NotFoundWidget(),
+                  ],
+                )),
               )
             : GridView.builder(
                 padding: EdgeInsets.all(12.sp),
@@ -344,138 +431,195 @@ class _HomeScreenState extends State<HomeScreen> {
                   final note = _filteredNotes[index];
                   bool isSelected = _selectedNotes.contains(note['id']);
 
-                  return GestureDetector(
-                    onLongPress: () {
-                      setState(() {
-                        _isSelecting = true;
-                      });
-                      _toggleNoteSelection(note['id']);
-                    },
-                    onTap: () {
-                      if (_selectedNotes.isEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => NoteEditorScreen(
-                                note: note,
-                                onSave: () {
-                                  _fetchNotes();
-                                  _loadNoteCounts();
-                                }),
-                          ),
-                        );
-                      } else {
-                        // Handle selection mode
-                        _toggleNoteSelection(note['id']);
-                      }
-                    },
-                    child: Column(
-                      children: [
-                        Stack(
-                          children: [
-                            AnimatedContainer(
-                              height: 250.h,
-                              width: double.infinity,
-                              duration: Duration(milliseconds: 200),
-                              margin: EdgeInsets.all(4.sp),
-                              padding: EdgeInsets.all(12.sp),
-                              decoration: BoxDecoration(
-                                color: AppColors.cFFFFFF,
-                                borderRadius: BorderRadius.circular(22.r),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  note['content'] is String
-                                      ? Text(
-                                          extractPlainText(note['content']),
-                                          maxLines: 12,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.left,
-                                        )
-                                      : QuillEditor(
-                                          controller: _controller,
-                                          focusNode: FocusNode(),
-                                          scrollController: ScrollController(),
+                  return FutureBuilder(
+                      future: getPhotos(note['id']),
+                      builder: (context, photos) {
+                        if (!photos.hasData) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          return GestureDetector(
+                            onLongPress: () {
+                              setState(() {
+                                _isSelecting = true;
+                              });
+                              _toggleNoteSelection(note['id']);
+                            },
+                            onTap: () {
+                              if (_selectedNotes.isEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => NoteEditorScreen(
+                                        note: note,
+                                        onSave: () {
+                                          _fetchNotes();
+                                          _loadNoteCounts();
+                                        }),
+                                  ),
+                                );
+                              } else {
+                                // Handle selection mode
+                                _toggleNoteSelection(note['id']);
+                              }
+                            },
+                            child: Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    AnimatedContainer(
+                                      height: 250.h,
+                                      width: double.infinity,
+                                      duration: Duration(milliseconds: 200),
+                                      margin: EdgeInsets.all(4.sp),
+                                      padding: EdgeInsets.all(12.sp),
+                                      decoration: BoxDecoration(
+                                        color: themeController.isDarkMode.value
+                                            ? Color(0xFF1E1E1E)
+                                            : const Color.fromARGB(
+                                                255, 255, 255, 255),
+                                        borderRadius:
+                                            BorderRadius.circular(22.r),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          note['content'] is String
+                                              ? Text(
+                                                  extractPlainText(
+                                                      note['content']),
+                                                  maxLines: 12,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.left,
+                                                )
+                                              : QuillEditor(
+                                                  controller: _controller,
+                                                  focusNode: FocusNode(),
+                                                  scrollController:
+                                                      ScrollController(),
+                                                ),
+                                          Expanded(
+                                            child: GridView.builder(
+                                              padding: EdgeInsets.all(8),
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: 3,
+                                                crossAxisSpacing: 8,
+                                                mainAxisSpacing: 8,
+                                              ),
+                                              itemCount: photos.data!.length,
+                                              itemBuilder: (context, index) {
+                                                final photo =
+                                                    photos.data![index];
+                                                return Stack(
+                                                  children: [
+                                                    Image.file(
+                                                      File(
+                                                        photo["path"],
+                                                      ),
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      height: double.infinity,
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (_isSelecting)
+                                      Positioned(
+                                        top: 8.sp,
+                                        right: 8.sp,
+                                        child: Container(
+                                          height: 25.h,
+                                          width: 25.w,
+                                          padding: EdgeInsets.zero,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? Colors.red
+                                                  : Colors.grey,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Transform.scale(
+                                            scale: 1.2,
+                                            child: Checkbox(
+                                              value: isSelected,
+                                              onChanged: (bool? value) {
+                                                _toggleNoteSelection(
+                                                    note['id']);
+                                              },
+                                              activeColor: Colors.red,
+                                              checkColor: Colors.white,
+                                              shape: CircleBorder(),
+                                            ),
+                                          ),
                                         ),
-                                ],
-                              ),
+                                      ),
+                                    if (!_isSelecting)
+                                      Positioned(
+                                        bottom: 8.sp,
+                                        right: 8.sp,
+                                        child: IconButton(
+                                          icon: Icon(Icons.download,
+                                              color: Colors.blue),
+                                          onPressed: () =>
+                                              _requestPermissionsAndDownload(
+                                                  note['title'],
+                                                  note['content']),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+
+                                _buildHighlightedText(
+                                    note['title'] ?? 'No title', _searchQuery),
+
+                                // Text(
+                                //   note['title'] ?? 'No title',
+                                //   maxLines: 1,
+                                //   overflow: TextOverflow.ellipsis,
+                                //   style:
+                                //       TextFontStyle.textStylec17cA1ABCCInter700,
+                                // ),
+                                UIHelper.verticalSpace(4.h),
+                                // Text(
+                                //   note['createAt'] != null
+                                //       ? DateFormat('h:mm a')
+                                //           .format(DateTime.parse(note['createAt']))
+                                //       : 'No Title',
+                                //   style: TextFontStyle.textStylec17cA1ABCCInter700
+                                //       .copyWith(fontSize: 12.sp),
+                                //   maxLines: 1,
+                                //   overflow: TextOverflow.ellipsis,
+                                // ),
+                                Text(
+                                  note['updatedAt'] != null
+                                      ? DateFormat('h:mm a').format(
+                                          DateTime.parse(note[
+                                              'updatedAt'])) // Display updated time
+                                      : DateFormat('h:mm a').format(
+                                          DateTime.parse(note[
+                                              'createAt'])), // Fallback to create time
+                                  style: TextFontStyle
+                                      .textStylec17cA1ABCCInter700
+                                      .copyWith(fontSize: 12.sp),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
-                            if (_isSelecting)
-                              Positioned(
-                                top: 8.sp,
-                                right: 8.sp,
-                                child: Container(
-                                  height: 25.h,
-                                  width: 25.w,
-                                  padding: EdgeInsets.zero,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color:
-                                          isSelected ? Colors.red : Colors.grey,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Transform.scale(
-                                    scale: 1.2,
-                                    child: Checkbox(
-                                      value: isSelected,
-                                      onChanged: (bool? value) {
-                                        _toggleNoteSelection(note['id']);
-                                      },
-                                      activeColor: Colors.red,
-                                      checkColor: Colors.white,
-                                      shape: CircleBorder(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (!_isSelecting)
-                              Positioned(
-                                bottom: 8.sp,
-                                right: 8.sp,
-                                child: IconButton(
-                                  icon:
-                                      Icon(Icons.download, color: Colors.blue),
-                                  onPressed: () =>
-                                      _requestPermissionsAndDownload(
-                                          note['title'], note['content']),
-                                ),
-                              ),
-                          ],
-                        ),
-                        Text(
-                          note['title'] ?? 'No title',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextFontStyle.textStylec17cA1ABCCInter700,
-                        ),
-                        UIHelper.verticalSpace(4.h),
-                        // Text(
-                        //   note['createAt'] != null
-                        //       ? DateFormat('h:mm a')
-                        //           .format(DateTime.parse(note['createAt']))
-                        //       : 'No Title',
-                        //   style: TextFontStyle.textStylec17cA1ABCCInter700
-                        //       .copyWith(fontSize: 12.sp),
-                        //   maxLines: 1,
-                        //   overflow: TextOverflow.ellipsis,
-                        // ),
-                        Text(
-                          note['updatedAt'] != null
-                              ? DateFormat('h:mm a').format(DateTime.parse(
-                                  note['updatedAt'])) // Display updated time
-                              : DateFormat('h:mm a').format(DateTime.parse(
-                                  note['createAt'])), // Fallback to create time
-                          style: TextFontStyle.textStylec17cA1ABCCInter700
-                              .copyWith(fontSize: 12.sp),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
+                          );
+                        }
+                      });
                 },
               ),
       ],
@@ -486,9 +630,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppBar(
       elevation: 1,
       shadowColor: AppColors.cFFFFFF,
-      iconTheme: IconThemeData(
-        color: Colors.black,
-      ),
+      // iconTheme: IconThemeData(
+      //   color: Colors.black,
+      // ),
       title: _isSearching
           ? TextField(
               controller: _searchController,
@@ -508,6 +652,17 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextFontStyle.textStylec17cA1ABCCInter700,
             ),
       actions: [
+        Obx(() => IconButton(
+              icon: Icon(
+                themeController.isDarkMode.value
+                    ? Icons.nightlight_round // Dark mode icon (Moon)
+                    : Icons.wb_sunny, // Light mode icon (Sun)
+                color: themeController.isDarkMode.value
+                    ? Colors.white
+                    : Colors.black,
+              ),
+              onPressed: themeController.toggleTheme,
+            )),
         if (_selectedNotes.isNotEmpty) ...[
           IconButton(
             icon: Icon(Icons.download, color: Colors.blue),
@@ -542,6 +697,9 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         PopupMenuButton<String>(
+          color: themeController.isDarkMode.value
+              ? Color(0xFF1E1E1E)
+              : const Color.fromARGB(255, 255, 255, 255),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
