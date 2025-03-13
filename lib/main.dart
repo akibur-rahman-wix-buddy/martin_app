@@ -164,32 +164,19 @@ class UtillScreenMobile extends StatelessWidget {
                   elevation: 0,
                   iconTheme: IconThemeData(color: Colors.black),
                 ),
-                textTheme: TextTheme(
-                    // bodyText1: TextStyle(color: Colors.black),
-                    // bodyText2: TextStyle(color: Colors.black87),
-                    // headline6: TextStyle(color: Colors.black),
-                    ),
+
                 elevatedButtonTheme: ElevatedButtonThemeData(
-                  style: ElevatedButton.styleFrom(
-                      // primary: Colors.blue, // Button Color for Light Mode
-                      // onPrimary: Colors.white, // Text color
-                      ),
+                  style: ElevatedButton.styleFrom(),
                 ),
               ),
               darkTheme: ThemeData(
-                brightness: Brightness.dark, // Dark Mode
-                // primarySwatch: Colors.blueAccent,
-                scaffoldBackgroundColor: Color(0xFF121212), // Dark background
+                brightness: Brightness.dark,
+                scaffoldBackgroundColor: Color(0xFF121212),
                 appBarTheme: const AppBarTheme(
                   color: Color.fromARGB(255, 14, 13, 13),
                   elevation: 0,
                   iconTheme: IconThemeData(color: Colors.white),
                 ),
-                textTheme: TextTheme(
-                    // bodyText1: TextStyle(color: Colors.white),
-                    // bodyText2: TextStyle(color: Colors.white70),
-                    // headline6: TextStyle(color: Colors.white),
-                    ),
               ),
               themeMode: themeController.isDarkMode.value
                   ? ThemeMode.dark
