@@ -510,15 +510,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       .contentTextStyle, // Content style
                                                   9,
                                                 )
-
-                                              // Text(
-                                              //     extractPlainText(
-                                              //         note['content']),
-                                              //     maxLines: 12,
-                                              //     overflow:
-                                              //         TextOverflow.ellipsis,
-                                              //     textAlign: TextAlign.left,
-                                              //   )
                                               : QuillEditor(
                                                   controller: _controller,
                                                   focusNode: FocusNode(),

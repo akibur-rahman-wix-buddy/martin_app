@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 // import 'package:http/http.dart' as http;
+import '../features/theme_controller/theme_controller.dart';
 import '/helpers/di.dart';
 import '../common_widgets/custom_button.dart';
 import '../constants/app_constants.dart';
@@ -19,6 +20,7 @@ import '../gen/colors.gen.dart';
 // final plcaeMarkAddress = locator.get<PlcaeMarkAddress>();
 //declared for cart scrren calling bottom shit with this from reorder rx
 final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+final ThemeController themeController = Get.find<ThemeController>();
 final GlobalKey<PopupMenuButtonState<String>> popUpGlobalkey =
     GlobalKey<PopupMenuButtonState<String>>();
 
@@ -249,8 +251,10 @@ void showMaterialDialog(
             title: Text(
               "Do you want to exit the app?",
               textAlign: TextAlign.center,
-              style: TextFontStyle.textStyle14c54585CDmSans400
-                  .copyWith(color: AppColors.c000000),
+              style: TextFontStyle.textStyle14c54585CDmSans400.copyWith(
+                  color: themeController.isDarkMode.value
+                      ? Colors.white
+                      : Colors.black),
             ),
             actions: <Widget>[
               customeButton(

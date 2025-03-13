@@ -467,7 +467,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   QuillToolbar.simple(
                     controller: _quillController,
                     configurations: QuillSimpleToolbarConfigurations(
-                        multiRowsDisplay: false),
+                      multiRowsDisplay: false,
+                      showFontSize: false,
+                      showFontFamily: false,
+                    ),
                   ),
                 ],
               ),
