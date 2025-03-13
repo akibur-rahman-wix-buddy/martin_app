@@ -31,7 +31,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ThemeController themeController = Get.find<ThemeController>();
   final ScrollController _scrollController = ScrollController();
-  final ScrollController _scrollbarController = ScrollController();
+  // final ScrollController _scrollbarController = ScrollController();
   TextEditingController _searchController = TextEditingController();
   quill.QuillController _controller = quill.QuillController.basic();
   bool _isScrolling = false;
@@ -201,11 +201,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Widget _buildHighlightedText(String text, String query) {
+  Widget _buildHighlightedText(
+      String text, String query, TextStyle textStyle, int? maxline) {
     if (query.isEmpty || !text.toLowerCase().contains(query.toLowerCase())) {
       return Text(
         text,
-        style: TextFontStyle.textStylec17cA1ABCCInter700,
+        style: textStyle, // Use the passed text style
+        maxLines: maxline,
       );
     }
 
@@ -220,19 +222,22 @@ class _HomeScreenState extends State<HomeScreen> {
         spans.add(
           TextSpan(
             text: char,
-            style: TextFontStyle.textStylec17cA1ABCCInter700.copyWith(
-                color: Colors.red, // Highlighted color
-                fontWeight: FontWeight.bold,
-                backgroundColor: Colors.grey),
+            style: textStyle.copyWith(
+              color: themeController.isDarkMode.value
+                  ? Colors.black
+                  : Colors.white, // Highlighted color
+              fontWeight: FontWeight.bold,
+              backgroundColor: themeController.isDarkMode.value
+                  ? Colors.white
+                  : AppColors.c000000.withOpacity(0.3), // Highlight background
+            ),
           ),
         );
       } else {
         spans.add(
           TextSpan(
             text: char,
-            style: TextFontStyle.textStylec17cA1ABCCInter700.copyWith(
-              color: Colors.black,
-            ),
+            style: textStyle, // Use the passed text style
           ),
         );
       }
@@ -240,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return RichText(
       text: TextSpan(children: spans),
-      maxLines: 1,
+      maxLines: 1, // Adjust as needed
       overflow: TextOverflow.ellipsis,
     );
   }
@@ -289,48 +294,54 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       child: Scaffold(
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         appBar: _buildAppBar(),
         drawer: CustomDrawer(),
         body: Stack(
           children: [
             if (_previousNotes.isNotEmpty)
-              Scrollbar(
-                controller: _scrollbarController,
-                thumbVisibility: false,
-                thickness: 6.0,
+              RawScrollbar(
+                controller: _scrollController,
+                thumbVisibility: false, // Set to true to make it visible
+                thickness: 20.0,
+                minThumbLength: 50.0,
+                mainAxisMargin: 40,
+                thumbColor: themeController.isDarkMode.value
+                    ? Color.fromARGB(255, 48, 47, 47)
+                    : AppColors.cA1ABCC,
                 radius: const Radius.circular(8.0),
-                child: SingleChildScrollView(
+                child: ListView(
                   controller: _scrollController,
-                  child: Column(
-                    children: [
-                      UIHelper.verticalSpace(4.h),
-                      Column(
-                        children: [
-                          Text(
-                            'Previous Notes',
-                            style: TextFontStyle.textStylec17cA09E9EPoppins700,
+                  children: [
+                    UIHelper.verticalSpace(4.h),
+                    Column(
+                      children: [
+                        Text(
+                          'Previous Notes',
+                          style: TextFontStyle.textStylec17cA09E9EPoppins700,
+                        ),
+                        UIHelper.verticalSpace(4.h),
+                        if (_previousNotes.isNotEmpty)
+                          NotesCarousel(
+                            previousNotes: _previousNotes,
+                            currentSlideIndex: _currentSlideIndex,
+                            carouselController: _carouselController,
                           ),
-                          UIHelper.verticalSpace(4.h),
-                          if (_previousNotes.isNotEmpty)
-                            NotesCarousel(
-                              previousNotes: _previousNotes,
-                              currentSlideIndex: _currentSlideIndex,
-                              carouselController: _carouselController,
-                            ),
-                          UIHelper.verticalSpace(6.h),
-                          Text(
-                            '${appData.read(kEditCount)}',
-                            style: TextFontStyle.textStylec17cA09E9EPoppins700
-                                .copyWith(fontSize: 16.sp),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          UIHelper.verticalSpace(6.h),
-                          _buildAllNotes(),
-                        ],
-                      ),
-                    ],
-                  ),
+                        UIHelper.verticalSpace(6.h),
+                        Text(
+                          '${appData.read(kEditCount)}',
+                          style: TextFontStyle.textStylec17cA09E9EPoppins700
+                              .copyWith(fontSize: 16.sp),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                        UIHelper.verticalSpace(6.h),
+                        _buildAllNotes(),
+                      ],
+                    ),
+                  ],
                 ),
               )
             else
@@ -380,7 +391,8 @@ class _HomeScreenState extends State<HomeScreen> {
               : Color.fromARGB(255, 20, 20, 20),
           backgroundColor: themeController.isDarkMode.value
               ? Color.fromARGB(255, 48, 47, 47)
-              : AppColors.cFFFFFF,
+              : AppColors.cA1ABCC,
+          shape: CircleBorder(),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -389,7 +401,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          child: Icon(Icons.add),
+          child: Icon(
+            Icons.add,
+            color: AppColors.cFFFFFF,
+          ),
         ),
       ),
     );
@@ -487,14 +502,23 @@ class _HomeScreenState extends State<HomeScreen> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           note['content'] is String
-                                              ? Text(
+                                              ? _buildHighlightedText(
                                                   extractPlainText(
                                                       note['content']),
-                                                  maxLines: 12,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  textAlign: TextAlign.left,
+                                                  _searchQuery,
+                                                  TextFontStyle
+                                                      .contentTextStyle, // Content style
+                                                  9,
                                                 )
+
+                                              // Text(
+                                              //     extractPlainText(
+                                              //         note['content']),
+                                              //     maxLines: 12,
+                                              //     overflow:
+                                              //         TextOverflow.ellipsis,
+                                              //     textAlign: TextAlign.left,
+                                              //   )
                                               : QuillEditor(
                                                   controller: _controller,
                                                   focusNode: FocusNode(),
@@ -581,7 +605,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
 
                                 _buildHighlightedText(
-                                    note['title'] ?? 'No title', _searchQuery),
+                                  extractPlainText(
+                                    note['title'],
+                                  ),
+                                  _searchQuery,
+                                  TextFontStyle.titleTextStyle, 1,
+                                  // Content style
+                                ),
 
                                 // Text(
                                 //   note['title'] ?? 'No title',
@@ -628,8 +658,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   AppBar _buildAppBar() {
     return AppBar(
+      surfaceTintColor: themeController.isDarkMode.value
+          ? Color.fromARGB(255, 20, 20, 20)
+          : AppColors.allPrimaryColor,
+      // automaticallyImplyLeading: false,
+      scrolledUnderElevation: 0,
+      backgroundColor: themeController.isDarkMode.value
+          ? Color.fromARGB(255, 20, 20, 20)
+          : AppColors.allPrimaryColor,
       elevation: 1,
-      shadowColor: AppColors.cFFFFFF,
+      // shadowColor: AppColors.cFFFFFF,
       // iconTheme: IconThemeData(
       //   color: Colors.black,
       // ),
@@ -640,10 +678,16 @@ class _HomeScreenState extends State<HomeScreen> {
               onChanged: _onSearchQueryChanged,
               decoration: InputDecoration(
                 hintText: 'Search Notes...',
-                hintStyle: TextStyle(color: Colors.black),
+                hintStyle: TextStyle(
+                    color: themeController.isDarkMode.value
+                        ? Colors.white
+                        : Colors.black),
                 border: InputBorder.none,
               ),
-              style: TextStyle(color: Colors.black),
+              style: TextStyle(
+                  color: themeController.isDarkMode.value
+                      ? Colors.white
+                      : Colors.black),
             )
           : Text(
               _selectedNotes.isEmpty

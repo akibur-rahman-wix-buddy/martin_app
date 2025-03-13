@@ -2,17 +2,23 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notely/constants/text_font_style.dart';
 import 'package:notely/features/lock_notes/presentation/widget/show_lock_dialog.dart';
 import 'package:notely/helpers/navigation_service.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../constants/app_constants.dart';
+import '../../../../gen/colors.gen.dart';
 import '../../../../helpers/di.dart';
 import '../../../../helpers/helper_methods.dart';
 import '../../../database/db_helper.dart';
+import '../../../lock_notes/presentation/widget/show_unlock_dialog.dart';
+import '../../../theme_controller/theme_controller.dart';
 
 class NoteEditorScreen extends StatefulWidget {
   final Map<String, dynamic>? note;
@@ -26,23 +32,36 @@ class NoteEditorScreen extends StatefulWidget {
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
+  final ThemeController themeController = Get.find<ThemeController>();
   final imagesData = ImagesData();
   final _titleController = TextEditingController();
   late QuillController _quillController;
   List<Map<String, dynamic>> _photos = [];
+  List<Map<String, dynamic>> _lockedNotes = [];
+  List<Map<String, dynamic>> _filteredNotes = [];
   bool _isLoading = true;
   bool _isStarred = false;
   bool _isLocked = false;
   bool _isNewNote = true;
   String content = '';
   String title = '';
+  String? password;
 
   @override
   void initState() {
     super.initState();
     _quillController = QuillController.basic();
     _loadNote();
-    _loadPhotos(); // Ensure photos are loaded when the screen is initialized
+    _loadPhotos();
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch $url')),
+      );
+    }
   }
 
   Future<void> _loadPhotos() async {
@@ -116,27 +135,29 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         jsonEncode(_quillController.document.toDelta().toJson());
 
     if (_isNewNote) {
-      int noteId = await DatabaseHelper().addNote(
-        title.isNotEmpty ? title : ' ',
-        contentJson,
-      );
-      for (var image in imagesData.images) {
-        if (image.isNew) {
-          String? imagePath = await moveImageToPermanentPath(image.path);
-          if (imagePath != null)
-            await DatabaseHelper().insertPhoto(imagePath, noteId);
+      if (!_quillController.document.isEmpty()) {
+        int noteId = await DatabaseHelper().addNote(
+          title.isNotEmpty ? title : '',
+          contentJson,
+        );
+        if (_isLocked) {
+          await DatabaseHelper().lockNote(noteId, password!);
         }
-        if (image.isDeleted) {
-          // await DatabaseHelper().deletePhoto(image.id!);
-        }
-      }
 
-      //  await DatabaseHelper().insertPhoto(file.path, widget.noteId!);
-      setState(() {
-        widget.noteId = noteId;
-        _isNewNote = false;
-      });
-      // Reload photos after creating a new note
+        for (var image in imagesData.images) {
+          if (image.isNew) {
+            String? imagePath = await moveImageToPermanentPath(image.path);
+            if (imagePath != null)
+              await DatabaseHelper().insertPhoto(imagePath, noteId);
+          }
+          if (image.isDeleted) {}
+        }
+
+        setState(() {
+          widget.noteId = noteId;
+          _isNewNote = false;
+        });
+      }
     } else {
       await DatabaseHelper()
           .updateNote(widget.noteId!, title, contentJson, starred: _isStarred);
@@ -169,8 +190,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       appData.write(
           kEditCount, '${_titleController.text} ${getFormattedDate()}');
     }
-    await _saveNote();
-    return Future.value(true);
+
+    try {
+      await _saveNote();
+      return true;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save note: $e')),
+      );
+      return false;
+    }
   }
 
   void _toggleStarred() {
@@ -180,13 +209,49 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _saveNote();
   }
 
-  void _lockNote() {
+  void _loadLockedNotes() async {
+    List<Map<String, dynamic>> lockedNotes =
+        await DatabaseHelper().getLockedNotes();
+    setState(() {
+      _lockedNotes = lockedNotes;
+      _filteredNotes = lockedNotes;
+    });
+  }
+
+  Future<void> _lockNote() async {
     if (widget.note != null) {
-      showLockNotesDialog(
-        context,
-        widget.note!['id'],
-        () => setState(() => _isLocked = true),
-      );
+      final filterLockNote = await DatabaseHelper()
+          .filterData(filed: 'id', table: 'notes', value: widget.noteId!);
+      if (_isLocked) {
+        showUnlockDialog(
+            context, widget.noteId!, filterLockNote.first['password'], () {
+          _loadLockedNotes();
+        });
+      } else {
+        // Lock the note
+        showLockNotesDialog(
+          context,
+          widget.note!['id'],
+          () => setState(() {
+            _isLocked = true;
+            _saveNote(); // Save after locking
+          }),
+        );
+      }
+    } else {
+      if (_isLocked) {
+        showLocalUnlockDialog(context, password!, () {
+          setState(() {
+            _isLocked = false;
+          });
+        });
+      } else {
+        showLockLocal(context, (pass) {
+          password = pass;
+          _isLocked = true;
+          setState(() {});
+        });
+      }
     }
   }
 
@@ -195,11 +260,15 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         appBar: AppBar(
-          // iconTheme: IconThemeData(color: Colors.black),
+          backgroundColor: themeController.isDarkMode.value
+              ? Color.fromARGB(255, 20, 20, 20)
+              : AppColors.allPrimaryColor,
           title: Text(
             _isNewNote ? 'New Note' : 'Edit Note',
-            // style: TextFontStyle.textStylec17c000000Poppins400,
           ),
           actions: [
             IconButton(onPressed: _pickImage, icon: Icon(Icons.photo)),
@@ -227,9 +296,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: "lock",
                   child: Row(
                     children: [
-                      Icon(Icons.lock),
+                      Icon(_isLocked ? Icons.lock_open : Icons.lock),
                       SizedBox(width: 10.w),
-                      Text("Lock"),
+                      Text(_isLocked ? "Unlock" : "Lock"),
                     ],
                   ),
                   onTap: _lockNote,
@@ -248,8 +317,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     child: TextField(
                       controller: _titleController,
                       decoration: InputDecoration(
-                        hintText:
-                            'Title (optional)', // Indicate that title is optional
+                        hintText: 'Title (optional)',
                         border: InputBorder.none,
                         hintStyle:
                             TextStyle(fontSize: 16.sp, color: Colors.grey),
@@ -264,9 +332,56 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                             controller: _quillController,
                             configurations: QuillEditorConfigurations(
                               placeholder: 'Write your note.....',
-                              customStyleBuilder: (attribute) =>
-                                  TextStyle(fontSize: 16.sp),
+                              customStyleBuilder: (attribute) {
+                                if (attribute.key == 'a') {
+                                  return TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                    fontSize: 16.sp,
+                                  );
+                                }
+                                return TextStyle(fontSize: 16.sp);
+                              },
                               padding: EdgeInsets.symmetric(horizontal: 16.w),
+                              onLaunchUrl: (String url) async {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Link Options'),
+                                    content: Text(url),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          _launchUrl(url);
+                                        },
+                                        child: Text('Open'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Clipboard.setData(
+                                              ClipboardData(text: url));
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Link copied to clipboard')),
+                                          );
+                                        },
+                                        child: Text('Copy'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Cancel'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                                return;
+                              },
                             ),
                           ),
                           imagesData.images

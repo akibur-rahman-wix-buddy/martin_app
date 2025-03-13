@@ -11,10 +11,10 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import '../../../theme_controller/theme_controller.dart';
 
 class NotesCarousel extends StatelessWidget {
+  final ThemeController themeController = Get.find<ThemeController>();
   final List<Map<String, dynamic>> previousNotes;
   final int currentSlideIndex;
   final CarouselSliderController carouselController;
-  final ThemeController themeController = Get.find<ThemeController>();
 
   NotesCarousel({
     required this.previousNotes,
@@ -77,17 +77,20 @@ class NotesCarousel extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SizedBox(height: 5),
+                            SizedBox(height: 5.h),
                             note['content'] is String
                                 ? Text(
                                     extractPlainText(note['content']),
-                                    maxLines: 5,
+                                    maxLines: 4,
                                     overflow: TextOverflow.ellipsis,
                                     textAlign: TextAlign.center,
                                     style: TextFontStyle
-                                        .textStylec17cA1ABCCInter700
+                                        .textStyle14c54585CDmSans400
                                         .copyWith(
                                       fontSize: 14.sp,
+                                      color: themeController.isDarkMode.value
+                                          ? AppColors.cFFFFFF
+                                          : AppColors.c000000,
                                     ),
                                   )
                                 : QuillEditor(
@@ -133,6 +136,7 @@ class NotesCarousel extends StatelessWidget {
 
 // NoteDetailScreen to display the selected note in full
 class NoteDetailScreen extends StatelessWidget {
+  final ThemeController themeController = Get.find<ThemeController>();
   final Map<String, dynamic> note;
 
   NoteDetailScreen({required this.note});
@@ -140,15 +144,23 @@ class NoteDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: themeController.isDarkMode.value
+          ? Color.fromARGB(255, 20, 20, 20)
+          : AppColors.allPrimaryColor,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         title: Text(
           note['title'] ?? 'Note',
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(
+              color: themeController.isDarkMode.value
+                  ? Colors.white
+                  : Colors.black),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.sp),
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -156,7 +168,11 @@ class NoteDetailScreen extends StatelessWidget {
               note['content'] is String
                   ? Text(
                       extractPlainText(note['content']),
-                      style: TextStyle(fontSize: 16),
+                      style: TextStyle(
+                          fontSize: 14.sp,
+                          color: themeController.isDarkMode.value
+                              ? Colors.white
+                              : Colors.black),
                     )
                   : QuillEditor(
                       controller: quill.QuillController(

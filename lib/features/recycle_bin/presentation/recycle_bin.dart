@@ -97,8 +97,14 @@ class _RecycleBinScreenState extends State<RecycleBinScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: themeController.isDarkMode.value
+          ? Color.fromARGB(255, 20, 20, 20)
+          : AppColors.allPrimaryColor,
       key: _scaffoldKey,
       appBar: AppBar(
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(

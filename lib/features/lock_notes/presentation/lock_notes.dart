@@ -219,11 +219,10 @@ class LockNotesScreen extends StatefulWidget {
 }
 
 class _LockNotesScreenState extends State<LockNotesScreen> {
+  final ThemeController themeController = Get.find<ThemeController>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map<String, dynamic>> _lockedNotes = [];
   List<Map<String, dynamic>> _filteredNotes = [];
-
-  final ThemeController themeController = Get.find<ThemeController>();
 
   Set<int> _selectedNotes = {}; // Track selected notes
   bool _isSearching = false;
@@ -259,8 +258,14 @@ class _LockNotesScreenState extends State<LockNotesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: themeController.isDarkMode.value
+          ? Color.fromARGB(255, 20, 20, 20)
+          : AppColors.allPrimaryColor,
       key: _scaffoldKey,
       appBar: AppBar(
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: Icon(Icons.menu),

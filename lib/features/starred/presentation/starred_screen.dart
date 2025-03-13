@@ -131,6 +131,55 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
     setState(() {});
   }
 
+  Widget _buildHighlightedText(
+      String text, String query, TextStyle textStyle, int? maxline) {
+    if (query.isEmpty || !text.toLowerCase().contains(query.toLowerCase())) {
+      return Text(
+        text,
+        style: textStyle, // Use the passed text style
+        maxLines: maxline,
+      );
+    }
+
+    List<TextSpan> spans = [];
+    int lastMatchEnd = 0;
+
+    for (int i = 0; i < text.length; i++) {
+      String char = text[i];
+      bool isMatch = query.toLowerCase().contains(char.toLowerCase());
+
+      if (isMatch) {
+        spans.add(
+          TextSpan(
+            text: char,
+            style: textStyle.copyWith(
+              color: themeController.isDarkMode.value
+                  ? Colors.black
+                  : Colors.white, // Highlighted color
+              fontWeight: FontWeight.bold,
+              backgroundColor: themeController.isDarkMode.value
+                  ? Colors.white
+                  : AppColors.c000000.withOpacity(0.3), // Highlight background
+            ),
+          ),
+        );
+      } else {
+        spans.add(
+          TextSpan(
+            text: char,
+            style: textStyle, // Use the passed text style
+          ),
+        );
+      }
+    }
+
+    return RichText(
+      text: TextSpan(children: spans),
+      maxLines: 1, // Adjust as needed
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   String extractPlainText(String deltaJson) {
     try {
       var document =
@@ -159,7 +208,13 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
       },
       child: Scaffold(
         key: _scaffoldKey,
+        backgroundColor: themeController.isDarkMode.value
+            ? Color.fromARGB(255, 20, 20, 20)
+            : AppColors.allPrimaryColor,
         appBar: AppBar(
+          backgroundColor: themeController.isDarkMode.value
+              ? Color.fromARGB(255, 20, 20, 20)
+              : AppColors.allPrimaryColor,
           automaticallyImplyLeading: false,
           leading: IconButton(
             icon: Icon(
@@ -327,11 +382,12 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   note['content'] is String
-                                      ? Text(
+                                      ? _buildHighlightedText(
                                           extractPlainText(note['content']),
-                                          maxLines: 12,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.left,
+                                          _searchQuery,
+                                          TextFontStyle
+                                              .contentTextStyle, // Content style
+                                          9,
                                         )
                                       : QuillEditor(
                                           controller: _controller,
@@ -373,11 +429,11 @@ class _StarredNotesScreenState extends State<StarredNotesScreen> {
                               ),
                           ],
                         ),
-                        Text(
-                          note['title'] ?? 'No title',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextFontStyle.textStylec17cA1ABCCInter700,
+                        _buildHighlightedText(
+                          extractPlainText(note['title']),
+                          _searchQuery,
+                          TextFontStyle.titleTextStyle, // Content style
+                          1,
                         ),
                         UIHelper.verticalSpace(4.h),
                         Row(
