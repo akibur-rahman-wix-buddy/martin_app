@@ -95,4 +95,19 @@ class TextFontStyle {
     color: AppColors.c000000,
     fontSize: 12.sp,
   );
+
+  static TextStyle titleTextStyle = TextStyle(
+    fontSize: 17.sp,
+    fontWeight: FontWeight.bold,
+    color: AppColors.cA1ABCC,
+    overflow: TextOverflow.ellipsis,
+
+    // Title color
+  );
+
+  static TextStyle contentTextStyle = TextStyle(
+    fontSize: 14.sp,
+    fontWeight: FontWeight.normal,
+    color: Colors.grey, // Content color
+  );
 }

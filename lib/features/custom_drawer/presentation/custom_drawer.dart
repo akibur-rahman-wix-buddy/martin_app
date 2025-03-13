@@ -153,7 +153,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blueAccent),
+            decoration: BoxDecoration(color: AppColors.c1738B2),
             child: Center(
               child: Text(
                 'Notely',
